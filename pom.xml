@@ -35,6 +35,11 @@
 
     <modules>
         <module>apps/petclinic-api</module>
+        <module>infra/registry</module>
+        <module>infra/config-server</module>
+        <module>infra/admin-server</module>
+        <module>infra/auth-service</module>
+        <module>infra/bills-service</module>
     </modules>
 
     <properties>
