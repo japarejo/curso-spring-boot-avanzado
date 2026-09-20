@@ -1,0 +1,240 @@
+/*
+ * PetClinic - Curso Spring Boot avanzado
+ *
+ * Hoja de estilos unica y estatica. Sustituye al CSS que el repo anterior
+ * generaba en tiempo de compilacion con wro4j 1.8.0 (2015) a partir de
+ * cuatro ficheros LESS mas el LESS completo de Bootstrap 3.3.6.
+ *
+ * Se mantienen los nombres de clase de Bootstrap que ya usaban las JSP
+ * (container, table-striped, form-group, control-label...) para no tener
+ * que reescribir las vistas.
+ */
+
+:root {
+    --color-texto: #34302d;
+    --color-suave: #6b6560;
+    --color-marca: #6db33f;
+    --color-marca-oscuro: #5a9434;
+    --color-borde: #d8d3ce;
+    --color-fondo: #ffffff;
+    --color-fondo-alt: #f7f5f3;
+    --color-error: #c0392b;
+    --radio: 4px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-texto);
+    background: var(--color-fondo);
+}
+
+a { color: var(--color-marca-oscuro); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1, h2, h3 { font-weight: 600; line-height: 1.2; margin: 0 0 .6em; }
+h2 { font-size: 1.6rem; }
+
+/* ---------- Rejilla ---------- */
+.container, .container-fluid {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+.container-fluid { max-width: none; }
+.xd-container { padding-top: 24px; padding-bottom: 40px; }
+.row { display: flex; flex-wrap: wrap; margin: 0 -8px; }
+[class^="col-"] { padding: 0 8px; }
+.col-md-12 { width: 100%; }
+.col-sm-2 { width: 100%; }
+.col-sm-10 { width: 100%; }
+.col-sm-offset-2 { margin-left: 0; }
+
+@media (min-width: 768px) {
+    .col-sm-2 { width: 16.666%; }
+    .col-sm-10 { width: 83.333%; }
+    .col-sm-offset-2 { margin-left: 16.666%; }
+}
+
+/* ---------- Barra de navegacion ---------- */
+.navbar {
+    background: var(--color-marca);
+    color: #fff;
+}
+.navbar .container {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 52px;
+    flex-wrap: wrap;
+}
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    letter-spacing: .02em;
+}
+.navbar-brand:hover { color: #fff; text-decoration: none; }
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav-right { margin-left: auto; }
+.nav > li > a {
+    display: block;
+    padding: 8px 12px;
+    color: #eaf5e2;
+    border-radius: var(--radio);
+}
+.nav > li > a:hover { background: var(--color-marca-oscuro); color: #fff; text-decoration: none; }
+.nav > li.active > a { background: var(--color-marca-oscuro); color: #fff; font-weight: 600; }
+.nav > li.user { padding: 8px 4px; color: #fff; font-weight: 600; }
+.nav > li.badge-admin {
+    padding: 2px 8px;
+    background: #fff;
+    color: var(--color-marca-oscuro);
+    border-radius: 10px;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.nav form { margin: 0; }
+
+/* ---------- Tablas ---------- */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+.table th, .table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-borde);
+    vertical-align: top;
+}
+.table th { font-weight: 600; background: var(--color-fondo-alt); }
+.table-condensed th, .table-condensed td { padding: 6px 8px; }
+.table-striped tbody tr:nth-child(odd) { background: #fbfaf9; }
+
+/* ---------- Listas de definicion ---------- */
+.dl-horizontal { margin: 0 0 20px; }
+.dl-horizontal dt { font-weight: 600; color: var(--color-suave); }
+.dl-horizontal dd { margin: 0 0 8px; }
+
+@media (min-width: 768px) {
+    .dl-horizontal dt { float: left; width: 160px; clear: left; }
+    .dl-horizontal dd { margin-left: 176px; }
+}
+
+/* ---------- Formularios ---------- */
+.form-group { margin-bottom: 16px; }
+.form-horizontal .form-group { display: flex; flex-wrap: wrap; align-items: flex-start; }
+.control-label {
+    display: block;
+    padding-top: 8px;
+    font-weight: 600;
+    color: var(--color-suave);
+}
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--color-texto);
+    background: #fff;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+}
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-marca);
+    box-shadow: 0 0 0 3px rgba(109, 179, 63, .18);
+}
+
+/* Estado de error de Spring MVC (<form:errors>) */
+.has-error .form-control { border-color: var(--color-error); }
+.has-error .control-label { color: var(--color-error); }
+.help-inline {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: .85rem;
+    color: var(--color-error);
+}
+.control-group.error .form-control { border-color: var(--color-error); }
+
+.has-feedback { position: relative; }
+.form-control-feedback { position: absolute; right: 10px; top: 8px; }
+
+/* Iconos: sustituyen a los glyphicon de Bootstrap, que ya no se cargan */
+.glyphicon { font-style: normal; }
+.glyphicon-ok::before { content: "\2713"; color: var(--color-marca-oscuro); }
+.glyphicon-remove::before { content: "\2717"; color: var(--color-error); }
+
+/* ---------- Botones ---------- */
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    line-height: 1.4;
+    border: 1px solid transparent;
+    border-radius: var(--radio);
+    cursor: pointer;
+    background: var(--color-marca);
+    color: #fff;
+}
+.btn:hover { background: var(--color-marca-oscuro); color: #fff; text-decoration: none; }
+.btn-default {
+    background: #fff;
+    color: var(--color-texto);
+    border-color: var(--color-borde);
+}
+.btn-default:hover { background: var(--color-fondo-alt); color: var(--color-texto); }
+.btn-link {
+    background: none;
+    border: none;
+    color: #eaf5e2;
+    padding: 8px 12px;
+}
+.btn-link:hover { background: var(--color-marca-oscuro); color: #fff; }
+
+/* ---------- Avisos ---------- */
+.alert {
+    position: relative;
+    padding: 12px 40px 12px 16px;
+    margin-bottom: 20px;
+    border: 1px solid var(--color-borde);
+    border-left-width: 4px;
+    border-radius: var(--radio);
+    background: var(--color-fondo-alt);
+}
+.alert-info { border-left-color: #3498db; }
+.alert-success { border-left-color: var(--color-marca); }
+.alert-danger { border-left-color: var(--color-error); }
+.alert .close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--color-suave);
+}
+
+/* ---------- Utilidades ---------- */
+.img-responsive { max-width: 100%; height: auto; display: block; }
+.text-center { text-align: center; }
+.empty { color: var(--color-suave); font-style: italic; }

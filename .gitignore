@@ -1,0 +1,49 @@
+# --- Build ---
+target/
+build/
+
+# El wrapper de Maven SI se versiona (mvnw, mvnw.cmd y .mvn/wrapper/*),
+# para que clonar el repo y ejecutar ./mvnw funcione sin Maven instalado.
+
+# --- Logs ---
+*.log
+log.txt
+logs/
+
+# --- Eclipse / STS ---
+.classpath
+.project
+.settings/
+.factorypath
+bin/
+
+# --- IntelliJ IDEA ---
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# --- VS Code ---
+.vscode/
+
+# --- NetBeans ---
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Secretos: NUNCA se versionan (modulo 3) ---
+# Las claves RSA de este repo son de DEMO y estan marcadas como tales.
+# Cualquier credencial real va en variables de entorno.
+*.env
+.env.local
+register-oauth2-credentials.bat
+application-local.properties
+application-local.yaml

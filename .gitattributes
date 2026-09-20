@@ -1,0 +1,20 @@
+# Normaliza finales de linea: el repo guarda LF, Windows checkoutea CRLF donde toca.
+# Evita el `sed -i 's/\r$//' ./mvnw` que hacia falta en el Dockerfile del repo anterior.
+* text=auto eol=lf
+
+# Scripts que DEBEN ser LF aunque se editen en Windows
+mvnw            text eol=lf
+*.sh            text eol=lf
+
+# Scripts que DEBEN ser CRLF
+mvnw.cmd        text eol=crlf
+*.bat           text eol=crlf
+
+# Binarios: git no los toca
+*.jar           binary
+*.png           binary
+*.jpg           binary
+*.gif           binary
+*.ico           binary
+*.pdf           binary
+*.uxf           binary

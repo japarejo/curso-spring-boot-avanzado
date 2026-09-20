@@ -1,0 +1,4 @@
+petName,age,symptom,expectedType
+Luna,3,revision anual,ROUTINE_CHECKUP
+Rocky,12,come menos desde ayer,SAME_DAY
+Milo,2,tiene convulsiones,EMERGENCY

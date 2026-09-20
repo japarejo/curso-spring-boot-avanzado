@@ -1,0 +1,5 @@
+petName,age,symptoms,expectedType
+Rufo,10,no come,SAME_DAY
+Bufi,11,no come ni caga,SAME_DAY
+Rufo,12,no come,SAME_DAY
+Rufo,8,no come,ROUTINE_CHECKUP
