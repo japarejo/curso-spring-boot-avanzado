@@ -1,37 +1,34 @@
 package org.springframework.samples.petclinic.configuration;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.springframework.samples.petclinic.model.BaseEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.JstlView;
 
+/**
+ * MODULO 2 - Conversion de tipos en la frontera web.
+ *
+ * Registrar el {@link GenericIdToEntityConverter} en el FormatterRegistry hace
+ * que cualquier controlador pueda declarar directamente un parametro de tipo
+ * entidad y recibirlo ya cargado de la base de datos a partir de su id, sin
+ * repetir la busqueda en cada metodo.
+ *
+ * Nota: aqui NO se declara ningun InternalResourceViewResolver. El prefijo y el
+ * sufijo de las JSP se configuran con spring.mvc.view.prefix / .suffix en
+ * application.properties. Tenerlo en los dos sitios a la vez (como ocurria en
+ * el proyecto anterior) es duplicidad: quien lee el codigo no sabe cual manda.
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-	
-	@Autowired
-	GenericIdToEntityConverter idToEntityConverter;
-	
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-    	
-        registry.addConverter(idToEntityConverter);
-    }
-    
-    @Override
-    public void configureViewResolvers(ViewResolverRegistry registry) {
-        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-        resolver.setPrefix("/WEB-INF/jsp/");
-        resolver.setSuffix(".jsp");
-        resolver.setViewClass(JstlView.class);
-        registry.viewResolver(resolver);
-    }
+
+	private final GenericIdToEntityConverter idToEntityConverter;
+
+	public WebConfig(GenericIdToEntityConverter idToEntityConverter) {
+		this.idToEntityConverter = idToEntityConverter;
+	}
+
+	@Override
+	public void addFormatters(FormatterRegistry registry) {
+		registry.addConverter(idToEntityConverter);
+	}
+
 }

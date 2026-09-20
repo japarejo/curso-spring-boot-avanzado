@@ -47,8 +47,22 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 	 * @param lastName Value to search for
 	 * @return a <code>Collection</code> of matching <code>Owner</code>s (or an empty
 	 * <code>Collection</code> if none found)
-	 */	
-	//@EntityGraph(attributePaths = "pets")
+	 *
+	 * MODULO 6 - Punto de partida del ejercicio de consultas N+1.
+	 *
+	 * El listado de propietarios muestra las mascotas de cada uno. Sin este
+	 * @EntityGraph, Hibernate ejecuta 1 consulta para los propietarios y N mas,
+	 * una por propietario, al recorrer owner.pets: el problema N+1.
+	 *
+	 * Ejercicio (ver modulos/06-spring-data-jpa):
+	 *   1. Comenta la linea @EntityGraph y arranca con el perfil `nplus1`,
+	 *      que activa open-in-view y el registro de SQL. Cuenta las consultas
+	 *      que provoca GET /owners.
+	 *   2. Arranca sin ese perfil: ahora falla con LazyInitializationException.
+	 *      Es el mismo defecto, que open-in-view se limitaba a ocultar.
+	 *   3. Vuelve a activar el @EntityGraph: una sola consulta con LEFT JOIN.
+	 */
+	@EntityGraph(attributePaths = "pets")
 	@Query("SELECT owner FROM Owner owner WHERE owner.lastName LIKE :lastName%")
 	public Collection<Owner> findByLastName(@Param("lastName") String lastName);
 
@@ -59,14 +73,43 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 	 * @return the <code>Owner</code> if found
 	 * @throws org.springframework.dao.DataRetrievalFailureException if not found
 	 */
-	/*@EntityGraph(attributePaths = {
-    	"pets",
-    	"pets.visits"
-	})*/	
-	//@Query("SELECT owner FROM Owner owner left join fetch owner.pets WHERE owner.id =:id")
+	/**
+	 * MODULO 6 - Grafo de carga.
+	 *
+	 * La vista de detalle de un propietario SIEMPRE muestra sus mascotas, asi que
+	 * traerlas en la misma consulta no es una optimizacion prematura: es lo correcto.
+	 *
+	 * Sin este @EntityGraph y con spring.jpa.open-in-view=false (nuestro caso),
+	 * renderizar la vista lanza LazyInitializationException, porque la sesion de
+	 * Hibernate ya se ha cerrado cuando la JSP recorre owner.pets. Con OSIV activado
+	 * el fallo no aparece, pero a cambio se ejecuta una consulta extra por mascota
+	 * fuera de la transaccion: el problema seguia ahi, solo que invisible.
+	 *
+	 * Ojo: esto NO es lo mismo que poner FetchType.EAGER en la entidad. El grafo se
+	 * aplica solo a esta consulta; el resto siguen cargando perezosamente.
+	 */
+	@EntityGraph(attributePaths = "pets")
 	public Owner findById(@Param("id") int id);
 
 	@Query("SELECT owner FROM Owner owner WHERE owner.user.username =:username")
 	public Owner findByUserName(@Param("username") String username);
+
+	/**
+	 * MODULO 6 - Fetch join explicito.
+	 *
+	 * Misma finalidad que el @EntityGraph de findById, escrita a mano en JPQL.
+	 * Tener las dos versiones permite compararlas en clase:
+	 *   - @EntityGraph es declarativo y se lee mejor;
+	 *   - LEFT JOIN FETCH da control total sobre el tipo de join.
+	 *
+	 * El DISTINCT evita que el propietario aparezca repetido una vez por mascota:
+	 * el join multiplica las filas, y sin el la coleccion llegaria duplicada.
+	 *
+	 * Lo usa la vista de detalle del propietario, que recorre owner.pets DESPUES
+	 * de que la transaccion haya terminado. Sin esta consulta, la peticion muere
+	 * con LazyInitializationException (spring.jpa.open-in-view esta a false).
+	 */
+	@Query("SELECT DISTINCT owner FROM Owner owner LEFT JOIN FETCH owner.pets WHERE owner.id = :id")
+	public Owner findByIdWithPets(@Param("id") int id);
 
 }

@@ -46,7 +46,7 @@ class BillApiClientTest {
 	@DynamicPropertySource
 	static void billApiProperties(DynamicPropertyRegistry registry) {
 		startBillApi();
-		registry.add("bills.api.url", () -> "http://localhost:" + server.getAddress().getPort());
+		registry.add("petclinic.bills.base-url", () -> "http://localhost:" + server.getAddress().getPort());
 	}
 
 	@AfterAll

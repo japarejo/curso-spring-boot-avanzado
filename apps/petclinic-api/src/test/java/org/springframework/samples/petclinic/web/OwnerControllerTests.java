@@ -17,7 +17,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.samples.petclinic.service.AuthoritiesService;
@@ -46,13 +46,13 @@ class OwnerControllerTests {
 	@Autowired
 	private OwnerController ownerController;
 
-	@MockBean
+	@MockitoBean
 	private OwnerService clinicService;
         
-        @MockBean
+        @MockitoBean
 	private UserService userService;
         
-        @MockBean
+        @MockitoBean
         private AuthoritiesService authoritiesService; 
 
 	@Autowired

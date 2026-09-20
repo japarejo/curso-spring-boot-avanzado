@@ -1,30 +1,32 @@
--- One admin user, named admin1 with passwor 4dm1n and authority admin
-INSERT INTO users(username,password,enabled) VALUES ('admin1','4dm1n',TRUE);
+-- Usuarios de demostracion. Las contrasenas se guardan cifradas con BCrypt
+-- y con el prefijo {bcrypt} que espera el DelegatingPasswordEncoder.
+--   admin1          / 4dm1n   -> autoridad admin
+--   owner1..owner10 / 0wn3r   -> autoridad owner
+--   vet1            / v3t     -> autoridad vet
+INSERT INTO users(username,password,enabled) VALUES ('admin1','{bcrypt}$2a$10$3Qh8FLZ2C7NAtrXNQqBULOr8iRUo43dxEl6Vrg3/rPuoB4EXoT0.m',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (1,1,'admin1','admin');
--- One owner user, named owner1 with passwor 0wn3r
-INSERT INTO users(username,password,enabled) VALUES ('owner1','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner1','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (11,1,'owner1','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner2','0wn3r',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner2','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (2,1,'owner2','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner3','0wn3r',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner3','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (3,1,'owner3','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner4','0wn3r',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner4','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (4,1,'owner4','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner5','0wn3r',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner5','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (5,1,'owner5','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner6','0wn3r',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner6','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (6,1,'owner6','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner7','0wn3r',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner7','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (7,1,'owner7','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner8','0wn3r',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner8','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (8,1,'owner8','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner9','0wn3r',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner9','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (9,1,'owner9','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner10','0wn3r',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner10','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (10,1,'owner10','owner');
--- One vet user, named vet1 with passwor v3t
-INSERT INTO users(username,password,enabled) VALUES ('vet1','v3t',TRUE);
-INSERT INTO authorities(id,version,username,authority) VALUES (12,1,'vet1','veterinarian');
+INSERT INTO users(username,password,enabled) VALUES ('vet1','{bcrypt}$2a$10$w6zmWCWlkgTH5yXyGs3JcOBWm4xc3eqNZWHR77NQ.mjEoWjUE75ya',TRUE);
+INSERT INTO authorities(id,version,username,authority) VALUES (12,1,'vet1','vet');
 
 INSERT INTO vets(id,version,first_name,last_name) VALUES (1,1, 'James', 'Carter');
 INSERT INTO vets(id,version,first_name,last_name) VALUES (2,1, 'Helen', 'Leary');

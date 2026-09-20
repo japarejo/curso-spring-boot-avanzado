@@ -58,7 +58,7 @@ class OwnerControllerMvcSliceTests {
 			"admin, 200"
 	})*/
 	@Test
-	@WithMockUser(username = "japarejo",authorities = {"owner","ver"})
+	@WithMockUser(username = "japarejo",authorities = {"owner","vet"})
 	@DisplayName("Prueba una ruta MVC sin arrancar base de datos ni servidor HTTP real")
 	//void shouldRenderOwnerDetailsWithMockedService(String authority, int responseCode) throws Exception {
 	void shouldRenderOwnerDetailsWithMockedService() throws Exception {

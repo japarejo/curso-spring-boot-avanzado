@@ -52,13 +52,13 @@ class OwnerServiceIsolatedMockTests {
 		Owner authenticatedOwner = owner(1, "George", "george");
 		given(this.principal.getName()).willReturn("george");
 		given(this.ownerRepository.findByUserName("george")).willReturn(authenticatedOwner);
-		given(this.ownerRepository.findById(1)).willReturn(authenticatedOwner);
+		given(this.ownerRepository.findByIdWithPets(1)).willReturn(authenticatedOwner);
 
 		Owner result = this.ownerService.findOwnerById(1, this.principal);
 
 		assertThat(result).isSameAs(authenticatedOwner);
 		verify(this.ownerRepository,times(1)).findByUserName(any(String.class));
-		verify(this.ownerRepository).findById(1);
+		verify(this.ownerRepository).findByIdWithPets(1);
 	}
 
 	@Test
@@ -72,7 +72,7 @@ class OwnerServiceIsolatedMockTests {
 
 		assertThat(result).isNull();
 		verify(this.ownerRepository).findByUserName("george");
-		verify(this.ownerRepository, never()).findById(2);
+		verify(this.ownerRepository, never()).findByIdWithPets(2);
 	}
 
 	@Test

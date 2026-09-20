@@ -57,10 +57,32 @@ public class OwnerService {
 		this.ownerRepository = ownerRepository;
 	}	
 
+	/**
+	 * Devuelve el propietario indicado SOLO si coincide con el usuario autenticado.
+	 *
+	 * Dos matices que conviene comentar en clase:
+	 *
+	 * 1. Se usa findByIdWithPets y no findById porque quien llama (la vista de
+	 *    detalle) recorre owner.pets una vez cerrada la transaccion. La coleccion
+	 *    tiene que venir ya cargada.
+	 *
+	 * 2. Esto es control de acceso a nivel de OBJETO, el primer riesgo del OWASP
+	 *    API Security Top 10: no basta con comprobar el rol, hay que comprobar la
+	 *    propiedad del recurso. Aqui esta escrito a mano; en el modulo 3 se ve la
+	 *    version declarativa con @PostAuthorize.
+	 */
 	@Transactional(readOnly = true)
 	public Owner findOwnerById(int id, Principal p) throws DataAccessException {
-		Owner current=ownerRepository.findByUserName(p.getName());
-		return current.getId()==id?ownerRepository.findById(id):null;
+		if (p == null) {
+			return null;
+		}
+		Owner current = ownerRepository.findByUserName(p.getName());
+		// current es null cuando el usuario autenticado no es un propietario
+		// (por ejemplo admin1 o vet1). Antes esto provocaba NullPointerException.
+		if (current == null || current.getId() != id) {
+			return null;
+		}
+		return ownerRepository.findByIdWithPets(id);
 	}
 
 	@Transactional(readOnly = true)

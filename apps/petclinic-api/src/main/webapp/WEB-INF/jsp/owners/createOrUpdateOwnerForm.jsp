@@ -17,8 +17,22 @@
             <petclinic:inputField label="Address" name="address"/>
             <petclinic:inputField label="City" name="city"/>
             <petclinic:inputField label="Telephone" name="telephone"/>
-            <petclinic:inputField label="Username" name="user.username"/>
-            <petclinic:inputField label="Password" name="user.password"/>
+            <%--
+                Las credenciales solo se piden al DAR DE ALTA un propietario.
+
+                Al editar no se muestran, por dos motivos:
+                  - Seguridad: el formulario anterior volcaba owner.user.password
+                    en un campo de texto, es decir, pintaba el hash BCrypt
+                    almacenado en la pagina. Una contrasena no se muestra nunca.
+                  - Persistencia: Owner.user es una relacion perezosa. Leerla al
+                    renderizar la vista, con la transaccion ya cerrada y
+                    spring.jpa.open-in-view=false, provocaba
+                    LazyInitializationException y un error 500.
+            --%>
+            <c:if test="${owner['new']}">
+                <petclinic:inputField label="Username" name="user.username"/>
+                <petclinic:inputField label="Password" name="user.password"/>
+            </c:if>
         </div>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
