@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Detalle registro</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 32px; max-width: 860px; color: #1f2937; }
+		nav { margin-bottom: 18px; }
+		section { margin-top: 20px; padding-top: 18px; border-top: 1px solid #e2e8f0; }
+		dl { display: grid; grid-template-columns: 140px 1fr; gap: 10px; }
+		dt { font-weight: 700; }
+		a.button, button { display: inline-block; padding: 8px 10px; border: 0; border-radius: 4px; background: #2563eb; color: white; text-decoration: none; font: inherit; cursor: pointer; }
+		select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; }
+		form.inline { display: inline-flex; gap: 8px; align-items: center; margin-right: 8px; }
+		.message { padding: 10px; background: #ecfdf5; border: 1px solid #bbf7d0; border-radius: 4px; }
+	</style>
+</head>
+<body>
+	<nav><a th:href="@{/records}">Volver</a></nav>
+	<p class="message" th:if="${message}" th:text="${message}">Mensaje</p>
+	<h1 th:text="${record.petName}">Luna</h1>
+	<dl>
+		<dt>Diagnostico</dt>
+		<dd th:text="${record.diagnosis}">Otitis</dd>
+		<dt>Plan</dt>
+		<dd th:text="${record.treatmentPlan}">Tratamiento</dd>
+		<dt>Propietario ACL</dt>
+		<dd th:text="${record.ownerUsername}">ana</dd>
+	</dl>
+	<a class="button" th:href="@{/records/{id}/edit(id=${record.id})}"
+		th:if="${canWrite}">Editar</a>
+	<section th:if="${canAdmin}">
+		<h2>Compartir este registro</h2>
+		<form class="inline" method="post" th:action="@{/records/{id}/share/read(id=${record.id})}">
+			<select name="username">
+				<option th:each="user : ${shareableUsers}" th:value="${user}" th:text="${user}">ana</option>
+			</select>
+			<button type="submit">Dar lectura</button>
+		</form>
+		<form class="inline" method="post" th:action="@{/records/{id}/share/write(id=${record.id})}">
+			<select name="username">
+				<option th:each="user : ${shareableUsers}" th:value="${user}" th:text="${user}">ana</option>
+			</select>
+			<button type="submit">Dar edicion</button>
+		</form>
+	</section>
+</body>
+</html>

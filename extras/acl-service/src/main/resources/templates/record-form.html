@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Registro clinico</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 32px; max-width: 720px; color: #1f2937; }
+		form { display: grid; gap: 12px; }
+		label { display: grid; gap: 6px; font-weight: 700; }
+		input, textarea { padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font: inherit; }
+		textarea { min-height: 120px; }
+		button { width: fit-content; padding: 9px 12px; border: 0; border-radius: 4px; background: #2563eb; color: white; font: inherit; cursor: pointer; }
+		.error { color: #b91c1c; font-size: 0.92rem; }
+	</style>
+</head>
+<body>
+	<nav><a th:href="@{/records}">Volver</a></nav>
+	<h1 th:text="${mode == 'create' ? 'Nuevo registro' : 'Editar registro'}">Registro</h1>
+	<form method="post"
+		th:object="${recordForm}"
+		th:action="${mode == 'create' ? '/records' : '/records/' + record.id}">
+		<label>Mascota
+			<input th:field="*{petName}" required>
+			<span class="error" th:if="${#fields.hasErrors('petName')}" th:errors="*{petName}">Error</span>
+		</label>
+		<label>Diagnostico
+			<input th:field="*{diagnosis}" required>
+			<span class="error" th:if="${#fields.hasErrors('diagnosis')}" th:errors="*{diagnosis}">Error</span>
+		</label>
+		<label>Plan de tratamiento
+			<textarea th:field="*{treatmentPlan}"></textarea>
+		</label>
+		<button type="submit">Guardar</button>
+	</form>
+</body>
+</html>

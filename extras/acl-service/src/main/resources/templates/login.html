@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Petclinic ACL</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 40px; max-width: 760px; color: #1f2937; }
+		form { display: grid; gap: 12px; max-width: 360px; }
+		label { display: grid; gap: 6px; font-weight: 700; }
+		input { padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font: inherit; }
+		button { width: fit-content; padding: 9px 12px; border: 0; border-radius: 4px; background: #2563eb; color: white; font: inherit; cursor: pointer; }
+		.panel { margin-top: 24px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; }
+		code { background: #e2e8f0; padding: 2px 4px; border-radius: 3px; }
+		.error { color: #b91c1c; font-weight: 700; }
+	</style>
+</head>
+<body>
+	<h1>Petclinic ACL</h1>
+	<p>Ejemplo de permisos por objeto con Spring Security ACL y restricciones en servicios.</p>
+	<p class="error" th:if="${param.error}">Credenciales no validas.</p>
+	<form method="post" th:action="@{/login}">
+		<label>Usuario <input name="username" value="ana" autocomplete="username" required></label>
+		<label>Password <input name="password" type="password" value="demo" autocomplete="current-password" required></label>
+		<button type="submit">Entrar</button>
+	</form>
+	<div class="panel">
+		<p><strong>Usuarios de prueba:</strong></p>
+		<p><code>ana/demo</code> veterinaria propietaria de Luna.</p>
+		<p><code>bruno/demo</code> veterinario propietario de Max y lector de Luna.</p>
+		<p><code>carla/demo</code> auxiliar con solo lectura por rol.</p>
+		<p><code>admin/admin</code> administrador con permiso ACL global.</p>
+	</div>
+</body>
+</html>

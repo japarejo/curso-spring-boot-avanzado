@@ -1,0 +1,155 @@
+# =============================================================================
+#  MODULO 5 - Toda la infraestructura del curso, levantada de una vez.
+#
+#    docker compose -f docker/compose.yaml up --build
+#
+#  Una vez arrancado:
+#    http://localhost:8761   Eureka: deben aparecer registrados 4 servicios
+#    http://localhost:9090   Spring Boot Admin
+#    http://localhost:8889/bills-service/development   configuracion servida
+#    http://localhost:8080/swagger-ui.html             API de petclinic
+#    http://localhost:8060/                            API de autenticacion
+#
+#  Para levantar solo la base de datos (uso habitual en clase):
+#    docker compose -f docker/compose.yaml up -d mysql
+#
+#  `depends_on: condition: service_healthy` evita la carrera clasica: la
+#  aplicacion arrancando antes de que la base de datos acepte conexiones.
+# =============================================================================
+
+name: curso-spring-boot-avanzado
+
+services:
+
+  mysql:
+    # 8.4 LTS. El proyecto anterior fijaba mysql:5.7, que esta fuera de soporte
+    # desde octubre de 2023 y no publica imagen arm64: en un Mac con Apple
+    # Silicon no arranca.
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: petclinic
+      MYSQL_USER: petclinic
+      MYSQL_PASSWORD: petclinic
+    ports:
+      - "3306:3306"
+    # No hacen falta scripts de inicializacion: el esquema y los datos los
+    # aplica Flyway desde la propia aplicacion
+    # (apps/petclinic-api/src/main/resources/db/migration). Antes estaban
+    # duplicados en docker/mysql/*.sql y habia que mantenerlos sincronizados
+    # a mano con src/main/resources/data.sql.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  registry:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: infra/registry
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8761/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  config-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: infra/config-server
+    environment:
+      EUREKA_URI: http://registry:8761/eureka
+      SPRING_PROFILES_ACTIVE: native
+    ports:
+      - "8889:8889"
+    depends_on:
+      registry:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8889/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  admin-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: infra/admin-server
+    environment:
+      EUREKA_URI: http://registry:8761/eureka
+    ports:
+      - "9090:9090"
+    depends_on:
+      registry:
+        condition: service_healthy
+
+  auth-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: infra/auth-service
+    environment:
+      EUREKA_ENABLED: "true"
+      EUREKA_URI: http://registry:8761/eureka
+      # En un despliegue real el secreto vendria de un gestor de secretos,
+      # nunca del fichero de composicion.
+      # JWT_SECRET: ...
+    ports:
+      - "8060:8060"
+    depends_on:
+      registry:
+        condition: service_healthy
+
+  bills-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: infra/bills-service
+    environment:
+      EUREKA_URI: http://registry:8761/eureka
+      CONFIG_SERVER_URI: http://config-server:8889
+    ports:
+      - "8040:8040"
+    depends_on:
+      registry:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+
+  petclinic-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: apps/petclinic-api
+    environment:
+      # Los perfiles se acumulan: `docker` aporta la integracion con la
+      # infraestructura y `mysql` la base de datos y las migraciones.
+      SPRING_PROFILES_ACTIVE: docker,mysql
+      MYSQL_URL: jdbc:mysql://mysql:3306/petclinic
+      MYSQL_USER: petclinic
+      MYSQL_PASSWORD: petclinic
+      EUREKA_URI: http://registry:8761/eureka
+      ADMIN_SERVER_URI: http://admin-server:9090
+      BILLS_API_URL: http://bills-service:8040
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      registry:
+        condition: service_healthy

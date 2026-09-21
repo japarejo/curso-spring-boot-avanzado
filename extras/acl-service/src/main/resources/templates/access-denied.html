@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Acceso denegado</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 40px; max-width: 720px; color: #1f2937; }
+		.error { padding: 12px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; color: #991b1b; }
+	</style>
+</head>
+<body>
+	<h1>Acceso denegado</h1>
+	<p class="error" th:text="${error}">Operacion denegada.</p>
+	<p><a th:href="@{/records}">Volver a registros visibles</a></p>
+</body>
+</html>

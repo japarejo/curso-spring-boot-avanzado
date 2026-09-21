@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Registros clinicos</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 32px; color: #1f2937; }
+		header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 24px; }
+		table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+		th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
+		.badge { display: inline-block; padding: 3px 6px; background: #e0f2fe; border-radius: 4px; margin-right: 4px; }
+		a.button, button { display: inline-block; padding: 8px 10px; border: 0; border-radius: 4px; background: #2563eb; color: white; text-decoration: none; font: inherit; cursor: pointer; }
+		button.secondary, a.secondary { background: #475569; }
+		.message { padding: 10px; background: #ecfdf5; border: 1px solid #bbf7d0; border-radius: 4px; }
+	</style>
+</head>
+<body>
+	<header>
+		<div>
+			<h1>Registros clinicos visibles</h1>
+			<p>Usuario <strong th:text="${username}">ana</strong>
+				<span class="badge" th:each="role : ${roles}" th:text="${role}">ROLE_VET</span>
+			</p>
+		</div>
+		<form method="post" th:action="@{/logout}">
+			<button class="secondary" type="submit">Salir</button>
+		</form>
+	</header>
+	<p class="message" th:if="${message}" th:text="${message}">Mensaje</p>
+	<a class="button" th:href="@{/records/new}" sec:authorize="hasRole('VET')">Nuevo registro</a>
+	<table>
+		<thead>
+			<tr>
+				<th>Mascota</th>
+				<th>Diagnostico</th>
+				<th>Propietario ACL</th>
+				<th>Acciones</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="record : ${records}">
+				<td th:text="${record.petName}">Luna</td>
+				<td th:text="${record.diagnosis}">Otitis</td>
+				<td th:text="${record.ownerUsername}">ana</td>
+				<td>
+					<a th:href="@{/records/{id}(id=${record.id})}">Ver</a>
+					<a th:href="@{/records/{id}/edit(id=${record.id})}"
+						th:if="${writableRecordIds.contains(record.id)}">Editar</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>
