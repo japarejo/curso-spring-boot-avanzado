@@ -495,7 +495,7 @@ Arrancar Bills con otro perfil sin Docker:
 Primero arranca Eureka y Config Server. Luego arranca Bills con el perfil `classroom`:
 
 ```powershell
-java -jar infra/bills-service/target/billsmicroservice-0.0.1-SNAPSHOT.jar --spring.profiles.active=classroom
+java -jar infra/bills-service/target/bills-service.jar --spring.profiles.active=classroom
 ```
 
 Comprueba:
@@ -1068,31 +1068,31 @@ Usa esta ruta si los alumnos no tienen Docker. Cubre Config Server, Eureka, Admi
 Terminal 1: Eureka.
 
 ```powershell
-java -jar infra/registry/target/registry-0.0.1-SNAPSHOT.jar
+java -jar infra/registry/target/registry.jar
 ```
 
 Terminal 2: Config Server.
 
 ```powershell
-java -jar infra/config-server/target/config-server-0.0.1-SNAPSHOT.jar
+java -jar infra/config-server/target/config-server.jar
 ```
 
 Terminal 3: Admin Server.
 
 ```powershell
-java -jar infra/admin-server/target/admin-server-0.0.1-SNAPSHOT.jar
+java -jar infra/admin-server/target/admin-server.jar
 ```
 
 Terminal 4: Bills 1.
 
 ```powershell
-java -jar infra/bills-service/target/billsmicroservice-0.0.1-SNAPSHOT.jar
+java -jar infra/bills-service/target/bills-service.jar
 ```
 
 Terminal 5: Bills 2 en otro puerto.
 
 ```powershell
-java -jar infra/bills-service/target/billsmicroservice-0.0.1-SNAPSHOT.jar --server.port=8041 --eureka.instance.instance-id=bills-service-8041
+java -jar infra/bills-service/target/bills-service.jar --server.port=8041 --eureka.instance.instance-id=bills-service-8041
 ```
 
 ### Paso 3: comprobar
@@ -1164,13 +1164,13 @@ Antes de dar la clase, comprueba:
 Cambia temporalmente el puerto del Config Server:
 
 ```powershell
-java -jar infra/config-server/target/config-server-0.0.1-SNAPSHOT.jar --server.port=8890
+java -jar infra/config-server/target/config-server.jar --server.port=8890
 ```
 
 Y arranca Bills con:
 
 ```powershell
-java -jar infra/bills-service/target/billsmicroservice-0.0.1-SNAPSHOT.jar --spring.cloud.config.uri=http://localhost:8890
+java -jar infra/bills-service/target/bills-service.jar --spring.cloud.config.uri=http://localhost:8890
 ```
 
 ### Bills responde `admin`
