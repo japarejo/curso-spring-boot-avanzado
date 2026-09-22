@@ -17,7 +17,7 @@ tres sesiones del módulo siguen siendo tres:
 | Documento | Qué contiene | Código |
 |---|---|---|
 | [`laboratorio-criteria-api.md`](laboratorio-criteria-api.md) | Metamodelo estático, fragmentos de repositorio, agregación, subconsultas correlacionadas, `HAVING`, paginación dinámica. 6 ejercicios | `repository/criteria/`, 13 pruebas |
-| [`laboratorio-transacciones-avanzadas.md`](laboratorio-transacciones-avanzadas.md) | Autoinvocación, actualización perdida, bloqueo optimista y pesimista, `NESTED`, eventos ligados a la transacción. 12 ejercicios | `service/transacciones/`, 12 pruebas |
+| [`laboratorio-transacciones-avanzadas.md`](laboratorio-transacciones-avanzadas.md) | Autoinvocación, actualización perdida, bloqueo optimista y pesimista, `NESTED`, eventos ligados a la transacción. 14 ejercicios | `service/transacciones/`, 12 pruebas |
 
 Si hay hueco en clase, los cuatro trozos más rentables son el apartado del metamodelo (20 min),
 la autoinvocación (15 min), el correo fantasma de `@TransactionalEventListener` (20 min) y la
