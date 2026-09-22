@@ -25,6 +25,11 @@ cd curso-spring-boot-avanzado
 
 No hace falta instalar Maven: el wrapper (`mvnw`) va incluido. Sí hace falta un **JDK 21**.
 
+> **En Windows**, `.\mvnw` en lugar de `./mvnw`, y `curl.exe` en lugar de `curl` (en
+> PowerShell, `curl` es un alias de `Invoke-WebRequest` y no entiende los mismos parámetros).
+> Todos los comandos del curso traducidos a PowerShell, y las siete trampas de la consola, en
+> [`modulos/00-comandos-windows.md`](modulos/00-comandos-windows.md).
+
 Abrir después:
 
 | Dirección | Qué es |
@@ -61,6 +66,25 @@ y las soluciones. La columna "dónde mirar" indica el código que ilustra cada t
 | 6 | Spring Data y JPA | [`modulos/06-spring-data-jpa/`](modulos/06-spring-data-jpa/) | `model/`, `repository/`, `service/`, `db/migration/` |
 
 Antes de la primera clase: [`modulos/00-preparacion-entorno.md`](modulos/00-preparacion-entorno.md).
+
+### Material de ampliación
+
+Fuera de la temporización: no se imparte, se entrega. Para quien termine antes y para
+llevárselo a casa.
+
+| Tema | Documento | Código |
+|---|---|---|
+| Criteria API y metamodelo estático | [`modulos/06-spring-data-jpa/laboratorio-criteria-api.md`](modulos/06-spring-data-jpa/laboratorio-criteria-api.md) | `repository/criteria/` |
+| Transacciones avanzadas | [`modulos/06-spring-data-jpa/laboratorio-transacciones-avanzadas.md`](modulos/06-spring-data-jpa/laboratorio-transacciones-avanzadas.md) | `service/transacciones/` |
+| Permisos por instancia con ACL | [`modulos/03-seguridad/guion-acl.md`](modulos/03-seguridad/guion-acl.md) | `extras/acl-service` |
+| Inicio de sesión con proveedores externos | [`extras/README.md`](extras/README.md) | `extras/oauth2-login-service` |
+| Pruebas contra la base de datos real | [`modulos/04-pruebas/guion-testcontainers.md`](modulos/04-pruebas/guion-testcontainers.md) | pruebas `*IT` |
+
+Los dos laboratorios del módulo 6 llevan código que funciona y 25 pruebas que lo demuestran:
+
+```bash
+./mvnw -pl apps/petclinic-api test -Dtest='VisitCriteriaRepositoryTests,TransaccionesAvanzadasVerificationTests'
+```
 
 ---
 

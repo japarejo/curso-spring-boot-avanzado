@@ -11,6 +11,18 @@ Guion docente. Duración estimada: **tres sesiones de 120 minutos**.
 | [`guion-consultas-n-mas-1.md`](guion-consultas-n-mas-1.md) | 5 ejercicios sobre el problema N+1 |
 | [`ejercicios.md`](ejercicios.md) | Migraciones, proyecciones y consultas dinámicas |
 
+Y dos laboratorios **fuera de la temporización**, que no se imparten sino que se entregan. Las
+tres sesiones del módulo siguen siendo tres:
+
+| Documento | Qué contiene | Código |
+|---|---|---|
+| [`laboratorio-criteria-api.md`](laboratorio-criteria-api.md) | Metamodelo estático, fragmentos de repositorio, agregación, subconsultas correlacionadas, `HAVING`, paginación dinámica. 6 ejercicios | `repository/criteria/`, 13 pruebas |
+| [`laboratorio-transacciones-avanzadas.md`](laboratorio-transacciones-avanzadas.md) | Autoinvocación, actualización perdida, bloqueo optimista y pesimista, `NESTED`, eventos ligados a la transacción. 12 ejercicios | `service/transacciones/`, 12 pruebas |
+
+Si hay hueco en clase, los cuatro trozos más rentables son el apartado del metamodelo (20 min),
+la autoinvocación (15 min), el correo fantasma de `@TransactionalEventListener` (20 min) y la
+comparación entre bloqueo optimista y pesimista (15 min).
+
 ## Objetivos
 
 - Situar JPA, Hibernate y Spring Data: qué es cada cosa.
@@ -20,6 +32,9 @@ Guion docente. Duración estimada: **tres sesiones de 120 minutos**.
 - Versionar el esquema con Flyway.
 - Detectar y corregir el problema N+1.
 - Usar proyecciones y consultas dinámicas.
+
+Y, en el material opcional: escribir consultas con la Criteria API y el metamodelo estático, y
+reconocer las cinco trampas de `@Transactional` que no lanzan ninguna excepción.
 
 ## Mapa del material
 
@@ -34,6 +49,8 @@ Guion docente. Duración estimada: **tres sesiones de 120 minutos**.
 | Restricción de negocio personalizada | `service/businessrules/ValidatePossibleDisease` |
 | Auditoría JPA | `model/AuditableEntity`, `configuration/AuditorAwareImpl` |
 | Criteria API | `repository/PetSpecification`, `VisitSpecification` |
+| Criteria API completa y metamodelo | `repository/criteria/` (laboratorio opcional) |
+| Autoinvocación, bloqueos y eventos | `service/transacciones/` (laboratorio opcional) |
 | Grafos de carga | `repository/OwnerRepository` (`@EntityGraph` y `LEFT JOIN FETCH`) |
 | Transacciones | `service/PetService`, `VisitService` |
 | Verificación de transacciones | `src/test/.../service/TransactionalExamplesVerificationTests.java` |
@@ -114,6 +131,16 @@ Las dos trampas que hay que enunciar sí o sí:
 
 El detalle en [`guion-transacciones.md`](guion-transacciones.md).
 
+Y las cinco que vienen **después**, ya en el material opcional: la autoinvocación que no da
+error, la actualización perdida que no da error, el bloqueo pesimista, por qué `NESTED` no
+funciona con JPA y el correo que se envía de una operación revertida. En
+[`laboratorio-transacciones-avanzadas.md`](laboratorio-transacciones-avanzadas.md), con pruebas
+que lo demuestran:
+
+```powershell
+.\mvnw -pl apps/petclinic-api test "-Dtest=TransaccionesAvanzadasVerificationTests"
+```
+
 ## Diagnóstico
 
 Antes de optimizar, medir:
@@ -136,3 +163,7 @@ Todo esto ya está en el perfil `nplus1`.
 | Flyway aborta con "checksum mismatch" | Se ha editado una migración ya aplicada. Es el comportamiento correcto. |
 | `ddl-auto=validate` falla al arrancar | El esquema de las migraciones no coincide con las entidades. Justamente para eso está. |
 | La paginación con `JOIN FETCH` avisa `HHH90003004` | Hibernate está paginando en memoria. La solución son dos consultas: primero los identificadores, después los datos. |
+| El IDE marca `Visit_` en rojo | No ha visto las fuentes generadas del metamodelo. Compilar una vez por línea de comandos y refrescar el proyecto. |
+| `No property 'buscar' found for type 'Visit'` | La implementación del fragmento no se llama `...Impl`. Es la regla de nombrado de Spring Data. |
+| `NestedTransactionNotSupportedException` | `NESTED` con `JpaTransactionManager`. No es un fallo de configuración: es el comportamiento correcto. Casi siempre lo que se quería era `REQUIRES_NEW`. |
+| Un `@TransactionalEventListener` no se ejecuta | O no había transacción al publicar el evento, o la transacción se revirtió. Las dos cosas son silenciosas. |

@@ -200,6 +200,42 @@
     <build>
         <finalName>${finalName}</finalName>
         <plugins>
+            <!--
+                LABORATORIO DE CRITERIA API (modulo 6, material adicional).
+
+                hibernate-jpamodelgen genera el METAMODELO ESTATICO: por cada
+                entidad Xxx crea una clase Xxx_ con una constante por atributo.
+                Permite escribir consultas Criteria tipadas:
+
+                    raiz.get(Visit_.date)        en lugar de   raiz.get("date")
+
+                La diferencia es que la primera version deja de compilar si
+                alguien renombra el campo, y la segunda falla en ejecucion.
+
+                OJO: en cuanto se declara <annotationProcessorPaths>, SOLO se
+                ejecutan los procesadores listados ahi. El POM padre declara
+                lombok; si aqui se anadiera jpamodelgen sin repetir lombok,
+                Lombok dejaria de funcionar y el modulo no compilaria.
+                Por eso aparecen los dos.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.hibernate.orm</groupId>
+                            <artifactId>hibernate-jpamodelgen</artifactId>
+                            <version>${hibernate.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

@@ -2,7 +2,19 @@
 
 Los ejercicios de transacciones están en [`guion-transacciones.md`](guion-transacciones.md)
 y los de consultas N+1 en [`guion-consultas-n-mas-1.md`](guion-consultas-n-mas-1.md).
-Estos cubren migraciones, proyecciones y consultas dinámicas.
+Estos cubren migraciones, proyecciones y consultas dinámicas. Soluciones de referencia en
+[`soluciones/`](soluciones/).
+
+Y, como material adicional fuera de la temporización, dos laboratorios con código que ya
+funciona y pruebas que lo demuestran:
+
+- [`laboratorio-criteria-api.md`](laboratorio-criteria-api.md) — metamodelo estático,
+  agregaciones, subconsultas correlacionadas, `HAVING`, paginación dinámica.
+- [`laboratorio-transacciones-avanzadas.md`](laboratorio-transacciones-avanzadas.md) —
+  autoinvocación, actualización perdida, bloqueo optimista y pesimista, `NESTED`, eventos
+  ligados a la transacción.
+
+En Windows, los comandos traducidos a PowerShell: [`../00-comandos-windows.md`](../00-comandos-windows.md).
 
 ---
 
@@ -95,6 +107,9 @@ cada migración aplicada y detecta que una ya aplicada ha cambiado.
 **Pregunta.** ¿En qué se diferencia una proyección de un DTO del módulo 2? *(La proyección
 condiciona la CONSULTA; el DTO condiciona la RESPUESTA. Se pueden usar juntos.)*
 
+Solución: [`soluciones/Ejercicio03Proyecciones.java`](soluciones/Ejercicio03Proyecciones.java),
+con las cuatro formas de proyectar y el SQL que genera cada una.
+
 ---
 
 ## Ejercicio 4 · Consultas dinámicas con Specification
@@ -116,6 +131,12 @@ condiciona la CONSULTA; el DTO condiciona la RESPUESTA. Se pueden usar juntos.)*
 
 **Pregunta.** ¿Por qué esto es preferible a construir la consulta concatenando cadenas?
 *(Además de la legibilidad: la API de criterios no permite inyección SQL.)*
+
+Solución: [`soluciones/Ejercicio04CiudadPropietario.java`](soluciones/Ejercicio04CiudadPropietario.java).
+
+Y si te ha sabido a poco, la continuación natural es el
+[laboratorio de Criteria API](laboratorio-criteria-api.md): lo mismo pero con agregaciones,
+subconsultas y proyecciones, que es donde una `Specification` ya no llega.
 
 ---
 
@@ -178,3 +199,6 @@ los campos quedan a null. Es el comportamiento correcto, y es el arreglo de un
 
 **Aviso.** Si la entidad usa `GenerationType.IDENTITY`, el proceso por lotes **no funciona**
 para las inserciones. Es la continuación natural del ejercicio 5.
+
+Solución: [`soluciones/Ejercicio07EscrituraPorLotes.java`](soluciones/Ejercicio07EscrituraPorLotes.java),
+con las dos versiones, cómo medirlas y por qué `IDENTITY` lo impide.

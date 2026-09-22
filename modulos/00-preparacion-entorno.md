@@ -12,7 +12,13 @@ y se lleva por delante el primer bloque del temario.
 | IDE | IntelliJ IDEA, VS Code con Extension Pack for Java, o Eclipse/STS | — |
 
 **Maven no hace falta instalarlo.** El repositorio trae el wrapper: siempre se invoca como
-`./mvnw` (Linux y macOS) o `mvnw.cmd` (Windows).
+`./mvnw` (Linux y macOS) o `.\mvnw` (Windows, desde la raíz del repositorio; PowerShell
+resuelve solo la extensión `.cmd`).
+
+> **Si trabajas en Windows**, lee [`00-comandos-windows.md`](00-comandos-windows.md) antes de
+> la primera sesión. Son cinco minutos y evita las dos sorpresas que más tiempo hacen perder:
+> `curl` es un alias de `Invoke-WebRequest` y no funciona como el curl de los guiones, y `jq`
+> no viene instalado. Ahí está todo el curso traducido a PowerShell.
 
 > **Java 21 y no otra cosa.** Es un requisito del cliente del curso. Si tienes varias
 > versiones instaladas, comprueba que `JAVA_HOME` apunta a la 21, porque es la que usa
@@ -65,7 +71,8 @@ Y en el navegador <http://localhost:8080>. Entrar con `owner1` / `0wn3r`.
 | `Port 8080 is already in use` | Otro proceso ocupa el puerto. `server.port=8081` o parar el otro proceso. |
 | `Could not resolve dependencies` en la primera ejecución | Sin acceso a repo.maven.apache.org. Un proxy corporativo suele requerir `~/.m2/settings.xml`. |
 | `mvnw: Permission denied` (Linux y macOS) | `chmod +x mvnw` |
-| `mvnw.cmd` no se reconoce (Windows) | Ejecutarlo desde la raíz del repositorio, con `.\mvnw.cmd` |
+| `mvnw.cmd` no se reconoce (Windows) | Ejecutarlo desde la raíz del repositorio, con `.\mvnw` |
+| `curl: no se puede encontrar un parámetro 's'` (Windows) | `curl` es un alias de `Invoke-WebRequest`. Usar `curl.exe`. Ver [`00-comandos-windows.md`](00-comandos-windows.md). |
 | Las pruebas `*IT` fallan | Necesitan Docker. Sin Docker se saltan solas; `./mvnw test` no las ejecuta. |
 
 ## Para el docente
