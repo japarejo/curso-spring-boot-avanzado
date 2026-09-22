@@ -1,0 +1,51 @@
+{
+    // =========================================================================
+    // Ajustes de VS Code para el curso.
+    //
+    // Este fichero SI se versiona (el resto de .vscode/ no), para que todo el
+    // mundo tenga el mismo comportamiento del editor el primer dia y nadie
+    // pierda la primera hora de clase peleandose con marcas rojas.
+    // =========================================================================
+
+    // Recoger los cambios del pom.xml sin tener que pedirlo a mano.
+    // Importa aqui porque apps/petclinic-api usa un procesador de anotaciones
+    // (hibernate-jpamodelgen) y el proyecto no se indexa bien hasta que el
+    // servidor de lenguaje ha leido esa configuracion.
+    "java.configuration.updateBuildConfiguration": "automatic",
+
+    // Las carpetas modulos/*/soluciones/ contienen ficheros .java sueltos: son
+    // SOLUCIONES DE REFERENCIA, estan fuera del arbol de fuentes a proposito
+    // para que el proyecto siga compilando aunque una este a medias.
+    //
+    // Sin esta exclusion, el servidor de lenguaje los trata como codigo real,
+    // no encuentra su classpath y los marca enteros en rojo. No es un error:
+    // es que no forman parte de la compilacion.
+    //
+    // .mvn/wrapper/MavenWrapperDownloader.java es lo mismo: forma parte del
+    // wrapper de Maven, no del proyecto.
+    "java.import.exclusions": [
+        "**/node_modules/**",
+        "**/.metadata/**",
+        "**/archetype-resources/**",
+        "**/META-INF/maven/**",
+        "**/modulos/**",
+        "**/.mvn/**"
+    ],
+
+    // target/ es SALIDA del compilador, no fuente. Se deja visible a proposito
+    // (el laboratorio de Criteria API pide abrir el metamodelo generado en
+    // target/generated-sources/annotations), pero fuera de las busquedas y del
+    // vigilante de ficheros, que si no se llena de ruido.
+    "search.exclude": {
+        "**/target": true
+    },
+    "files.watcherExclude": {
+        "**/target/**": true
+    },
+
+    "files.eol": "\n",
+    "[java]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 4
+    }
+}

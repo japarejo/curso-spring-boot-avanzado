@@ -1,0 +1,9 @@
+{
+    // Extensiones recomendadas. VS Code las ofrece al abrir el repositorio.
+    // Sin la primera, TODO el codigo Java aparece sin resaltar y sin navegacion,
+    // que es la otra causa habitual de "me sale todo en rojo".
+    "recommendations": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-boot-dev-pack"
+    ]
+}

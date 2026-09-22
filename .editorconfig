@@ -8,6 +8,14 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 4
 
+# Java va con TABULADOR, que es la convencion de Spring y la que ya usa el 92 %
+# del codigo de este repositorio (182 de 198 ficheros). Sin esta seccion, la
+# regla de [*] pondria espacios y cualquier "formatear al guardar" reindentaria
+# el fichero entero: el diff de un cambio de una linea saldria de doscientas.
+[*.java]
+indent_style = tab
+indent_size = 4
+
 [*.{xml,yaml,yml,json}]
 indent_size = 2
 

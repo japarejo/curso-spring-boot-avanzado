@@ -63,6 +63,58 @@ Después:
 
 Y en el navegador <http://localhost:8080>. Entrar con `owner1` / `0wn3r`.
 
+## Si el IDE marca código en rojo (y `mvnw` compila sin quejarse)
+
+Pasa, y casi siempre es lo mismo. **Antes de tocar nada, comprueba quién tiene razón:**
+
+```powershell
+.\mvnw -pl apps/petclinic-api clean test-compile
+```
+
+Si eso termina en `BUILD SUCCESS`, el código compila y lo que falla es el indexador del
+editor. Son dos causas:
+
+### 1. El metamodelo de JPA no está generado
+
+`apps/petclinic-api` genera clases en tiempo de compilación con un procesador de anotaciones
+(`hibernate-jpamodelgen`): `Visit_`, `Pet_`, `Owner_`… Las usa `repository/criteria/`.
+
+Esas clases **no están en el repositorio** —son producto de la compilación, y `target/` está
+ignorado—, así que si abres el proyecto en el IDE recién clonado, sin haber compilado nunca,
+el editor no las encuentra y marca toda la carpeta en rojo.
+
+```powershell
+.\mvnw -pl apps/petclinic-api compile      # esto las genera
+```
+
+El `pom.xml` ya trae `<m2e.apt.activation>jdt_apt</m2e.apt.activation>` para que Eclipse/STS y
+VS Code ejecuten el procesador ellos mismos. Si aun así siguen en rojo, hay que decirle al
+servidor de lenguaje que se olvide de lo que tenía indexado:
+
+| IDE | Qué hacer |
+|---|---|
+| **VS Code** | `Ctrl+Shift+P` → **Java: Clean Java Language Server Workspace** → *Restart and delete* |
+| IntelliJ IDEA | `Build > Rebuild Project`, y `File > Invalidate Caches` si persiste |
+| Eclipse / STS | `Project > Clean…`, y `Maven > Update Project` con *Force Update* |
+
+### 2. Los ficheros de `modulos/*/soluciones/`
+
+Son **soluciones de referencia**: `.java` sueltos, fuera del árbol de fuentes a propósito,
+para que el proyecto siga compilando aunque una solución esté a medias. El editor los ve como
+código normal, no les encuentra classpath y los marca enteros.
+
+No es un error. El repositorio trae `.vscode/settings.json` con la exclusión ya puesta; si
+usas otro IDE, basta con saber que esos ficheros no se compilan.
+
+### Y lo que hay dentro de `target/`
+
+`target/` es **salida** del compilador, no fuente: clases generadas, `.class`, informes, el
+`.war`. Si abres un fichero de ahí y el editor lo marca en rojo, es porque no forma parte de
+ningún directorio de fuentes desde su punto de vista. Se borra entero con `clean` y se
+regenera. No hay nada que arreglar ahí dentro.
+
+---
+
 ## Si algo falla
 
 | Síntoma | Causa y solución |
@@ -74,6 +126,8 @@ Y en el navegador <http://localhost:8080>. Entrar con `owner1` / `0wn3r`.
 | `mvnw.cmd` no se reconoce (Windows) | Ejecutarlo desde la raíz del repositorio, con `.\mvnw` |
 | `curl: no se puede encontrar un parámetro 's'` (Windows) | `curl` es un alias de `Invoke-WebRequest`. Usar `curl.exe`. Ver [`00-comandos-windows.md`](00-comandos-windows.md). |
 | Las pruebas `*IT` fallan | Necesitan Docker. Sin Docker se saltan solas; `./mvnw test` no las ejecuta. |
+| El IDE marca en rojo `repository/criteria/` | Falta generar el metamodelo. `./mvnw -pl apps/petclinic-api compile` y reiniciar el servidor de lenguaje. Ver el apartado anterior. |
+| El IDE marca en rojo `modulos/*/soluciones/` | Son soluciones de referencia, fuera de la compilación a propósito. |
 
 ## Para el docente
 

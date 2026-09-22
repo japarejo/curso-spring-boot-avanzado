@@ -28,6 +28,23 @@
 
     <properties>
         <finalName>petclinic-api</finalName>
+
+        <!--
+            MODULO 6 - Para que el IDE ejecute el procesador de anotaciones.
+
+            Este modulo genera el metamodelo estatico de JPA (Visit_, Pet_, ...)
+            con hibernate-jpamodelgen; ver maven-compiler-plugin mas abajo. La
+            linea de ordenes lo hace siempre. Los IDE basados en Eclipse (el
+            propio Eclipse/STS y VS Code, que usa el mismo servidor de lenguaje)
+            necesitan que se lo pidan explicitamente con esta propiedad.
+
+            Sin ella el proyecto COMPILA perfectamente, pero el editor marca en
+            rojo repository/criteria/ porque no encuentra las clases *_. Es un
+            fallo del indexador, no del compilador, y despista mucho.
+
+            Valores: disabled | reprocess | jdt_apt. No afecta a `mvnw`.
+        -->
+        <m2e.apt.activation>jdt_apt</m2e.apt.activation>
     </properties>
 
     <dependencies>

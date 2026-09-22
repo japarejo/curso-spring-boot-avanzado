@@ -121,11 +121,24 @@ El metamodelo **replica la jerarquía de las entidades**. `Pet` hereda `name` de
 `SingularAttribute<? super Pet, Y>`. En el código de este laboratorio se escribe
 `NamedEntity_.name` explícitamente, porque deja claro de dónde sale el atributo.
 
-> **Si el IDE marca `Visit_` en rojo** es que no ha visto las fuentes generadas. Compilar una
-> vez desde la línea de comandos y refrescar. En IntelliJ, `Build > Rebuild Project`; en
-> Eclipse/STS, comprobar que `Annotation Processing` está activado y hacer `Maven > Update
-> Project`. Este es el precio del metamodelo y hay que decirlo: cuesta un paso de
-> configuración en cada máquina.
+> **Si el IDE marca `Visit_` en rojo**, el código está bien: lo que pasa es que el editor no ha
+> visto las fuentes generadas. Comprobar siempre primero quién tiene razón:
+>
+> ```powershell
+> .\mvnw -pl apps/petclinic-api clean test-compile     # si dice BUILD SUCCESS, es el IDE
+> ```
+>
+> El `pom.xml` ya trae `<m2e.apt.activation>jdt_apt</m2e.apt.activation>` para que Eclipse/STS
+> y VS Code ejecuten el procesador. Si aun así sigue en rojo:
+>
+> - **VS Code**: `Ctrl+Shift+P` → *Java: Clean Java Language Server Workspace* → *Restart and delete*
+> - **IntelliJ**: `Build > Rebuild Project`
+> - **Eclipse/STS**: `Maven > Update Project` con *Force Update*
+>
+> Este es el precio del metamodelo y hay que decirlo en clase: cuesta un paso por máquina, y el
+> síntoma cuando falta —una carpeta entera en rojo en un proyecto que compila— asusta más de lo
+> que debería. Está en [`../00-preparacion-entorno.md`](../00-preparacion-entorno.md) para que
+> el alumnado lo tenga a mano.
 
 ## 2. El patrón "fragmento de repositorio"
 

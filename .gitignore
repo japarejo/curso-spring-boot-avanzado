@@ -25,7 +25,11 @@ bin/
 out/
 
 # --- VS Code ---
-.vscode/
+# Se ignora todo salvo los dos ficheros compartidos del curso, para que el
+# editor se comporte igual en todas las maquinas desde el primer arranque.
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # --- NetBeans ---
 nbproject/private/

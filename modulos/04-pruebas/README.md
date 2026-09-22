@@ -99,3 +99,4 @@ persistencia intentaría levantar clientes HTTP. Por eso `apiclients/BillsGatewa
 | Los `*IT` fallan por Docker | `MySqlTestContainerSupport` usa `disabledWithoutDocker = true`: sin Docker se saltan. |
 | La batería tarda muchísimo | Cada `@MockitoBean`, cada propiedad distinta y cada `@DirtiesContext` crean un contexto nuevo. |
 | `ExternalApiRestAssuredTests` falla | Sale a Internet. Excluir con `-Dgroups='!external-api'`. |
+| `[ERROR] Surefire is going to kill self fork JVM` al final de `verify` | **No es un fallo.** Aparece tras los `*IT` y el build termina en `BUILD SUCCESS`. Testcontainers y el pool de conexiones dejan hilos no demonio vivos, así que la JVM hija no muere en los 30 s que Surefire le da tras el `System.exit(0)` y la mata él. Conviene avisar en clase: es una línea roja que no significa nada, y si no se explica, alguien la da por rota. |
