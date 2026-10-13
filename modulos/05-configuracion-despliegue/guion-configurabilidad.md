@@ -111,8 +111,8 @@ Cierre de la capsula:
 
 Estas prácticas ahora están organizadas en dos guiones independientes para la aplicacion:
 
-- [Guion docente: problema N+1 en Spring Boot / JPA](docs/guion-nplus1.md)
-- [Guion docente: transacciones con Spring, JPA y Hibernate](docs/guion-transacciones.md)
+- [Guion docente: problema N+1 en Spring Boot / JPA](../06-spring-data-jpa/guion-consultas-n-mas-1.md)
+- [Guion docente: transacciones con Spring, JPA y Hibernate](../06-spring-data-jpa/guion-transacciones.md)
 
 
 ## Preparacion antes de clase

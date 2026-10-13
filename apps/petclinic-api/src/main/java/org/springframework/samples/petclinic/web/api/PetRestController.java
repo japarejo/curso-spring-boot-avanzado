@@ -52,7 +52,14 @@ public class PetRestController {
 	})
 	@GetMapping("/{id}")
 	public Pet findbyId(@Parameter(description = "Pet identifier", required = true) @PathVariable("id") int id) {
-		return petService.findPetById(id);
+		Pet pet = petService.findPetById(id);
+		// Sin esta comprobacion, un id inexistente devolvia 200 con el cuerpo vacio
+		// (Spring serializa un null como respuesta sin contenido), aunque la
+		// documentacion de arriba promete un 404.
+		if (pet == null) {
+			throw new ResourceNotFoundException("No existe la mascota " + id);
+		}
+		return pet;
 	}
 	
 	@Operation(summary = "Create a pet", description = "Creates a new pet from a JSON payload.")

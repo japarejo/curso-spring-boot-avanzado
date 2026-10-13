@@ -194,7 +194,7 @@ Ejemplo practico:
 1. Arrancar el microservicio:
 
 ```powershell
-.\mvnw.cmd -pl microservices\acl-microservice spring-boot:run
+.\mvnw.cmd -pl extras/acl-service spring-boot:run
 ```
 
 2. Abrir:

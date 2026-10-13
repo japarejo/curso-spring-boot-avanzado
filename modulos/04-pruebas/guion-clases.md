@@ -6,11 +6,11 @@ Objetivo: que el alumno entienda que un test no solo comprueba codigo, tambien d
 
 ## Preparacion previa
 
-Desde `apps/petclinic-api` ejecuta:
+Desde la raíz del repositorio ejecuta:
 
 ```powershell
-.\mvnw.cmd test
-.\mvnw.cmd surefire-report:report -DskipTests
+.\mvnw.cmd -pl apps/petclinic-api test
+.\mvnw.cmd -pl apps/petclinic-api surefire-report:report -DskipTests
 ```
 
 Ten localizados:
@@ -20,8 +20,8 @@ Ten localizados:
 - `src/test/java/org/springframework/samples/petclinic/testingexamples/spring/OwnerRepositoryJpaSliceTests.java`
 - `src/test/java/org/springframework/samples/petclinic/testingexamples/spring/OwnerControllerMvcSliceTests.java`
 - `src/test/java/org/springframework/samples/petclinic/testingexamples/spring/DirtiesContextExampleTests.java`
-- `target/reports/surefire.html`
-- `target/site/jacoco/index.html`
+- `apps/petclinic-api/target/reports/surefire.html`
+- `apps/petclinic-api/target/site/jacoco/index.html`
 
 ## Clase 1: JUnit 5, informes y cobertura
 
@@ -38,7 +38,7 @@ Actividad:
 - Ejecutar solo sus tests:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 ### 0:10-0:30 - Anatomia de un test JUnit 5
@@ -56,7 +56,7 @@ Cubrir:
 Demo:
 
 - Cambiar temporalmente una expectativa para provocar fallo.
-- Abrir el `.txt` o XML en `target/surefire-reports`.
+- Abrir el `.txt` o XML en `apps/petclinic-api/target/surefire-reports`.
 - Volver a dejar el test correcto.
 
 Mensaje clave:
@@ -117,7 +117,7 @@ Cubrir:
 
 Demo:
 
-- Abrir `target/reports/surefire.html`.
+- Abrir `apps/petclinic-api/target/reports/surefire.html`.
 - Localizar tests skipped.
 - Comparar skipped con fallo real.
 
@@ -127,7 +127,7 @@ Mensaje clave:
 
 ### 1:35-1:55 - Cobertura con JaCoCo
 
-Abrir `target/site/jacoco/index.html`.
+Abrir `apps/petclinic-api/target/site/jacoco/index.html`.
 
 Cubrir:
 
@@ -201,7 +201,7 @@ Cubrir:
 Demo:
 
 ```powershell
-.\mvnw.cmd "-Dtest=OwnerRepositoryJpaSliceTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=OwnerRepositoryJpaSliceTests" test
 ```
 
 Actividad:
@@ -234,7 +234,7 @@ Cubrir:
 Demo:
 
 ```powershell
-.\mvnw.cmd "-Dtest=OwnerControllerMvcSliceTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=OwnerControllerMvcSliceTests" test
 ```
 
 Actividad:
@@ -270,7 +270,7 @@ Demo:
 Comando:
 
 ```powershell
-.\mvnw.cmd "-Dtest=DirtiesContextExampleTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=DirtiesContextExampleTests" test
 ```
 
 Mensaje clave:

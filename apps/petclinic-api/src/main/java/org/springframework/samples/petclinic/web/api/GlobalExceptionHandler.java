@@ -9,13 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.samples.petclinic.service.exceptions.DuplicatedPetNameException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * MODULO 2 - Gestion centralizada de errores de la API con ProblemDetail (RFC 9457).
@@ -38,7 +41,10 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler({ BadRequestException.class, DuplicatedPetNameException.class,
-			MethodArgumentNotValidException.class, ConstraintViolationException.class })
+			MethodArgumentNotValidException.class, ConstraintViolationException.class,
+			// Sin estas dos, `GET /api/pets/abc` o un JSON mal formado caian en el
+			// catch-all y respondian 500, cuando el error es del cliente.
+			MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class })
 	public ProblemDetail handleBadRequest(Exception ex) {
 		ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
 		problem.setTitle("Peticion no valida");
@@ -76,6 +82,13 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ProblemDetail handleUnexpected(Exception ex) {
+		// Las excepciones propias de Spring MVC (405 metodo no permitido, 415 tipo
+		// de contenido no soportado, 400 parametro obligatorio ausente, 404 ruta
+		// inexistente...) implementan ErrorResponse y ya saben su estado. Sin esta
+		// comprobacion, este catch-all las convertia todas en 500.
+		if (ex instanceof ErrorResponse errorResponse) {
+			return errorResponse.getBody();
+		}
 		String referencia = Long.toHexString(System.nanoTime());
 		log.error("Error no controlado en la API [ref={}]", referencia, ex);
 
@@ -91,6 +104,14 @@ public class GlobalExceptionHandler {
 		}
 		if (ex instanceof ConstraintViolationException constraintViolationException) {
 			return detailFor(constraintViolationException);
+		}
+		if (ex instanceof MethodArgumentTypeMismatchException mismatch) {
+			return "Valor no valido para '" + mismatch.getName() + "': " + mismatch.getValue();
+		}
+		if (ex instanceof HttpMessageNotReadableException) {
+			// El mensaje original de Jackson incluye nombres de clases Java internas:
+			// no se devuelve al cliente.
+			return "El cuerpo de la peticion no es JSON valido o no tiene el formato esperado";
 		}
 		return ex.getMessage();
 	}

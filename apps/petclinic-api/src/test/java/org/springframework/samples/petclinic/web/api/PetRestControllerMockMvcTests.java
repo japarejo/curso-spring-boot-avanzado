@@ -66,6 +66,33 @@ class PetRestControllerMockMvcTests {
 	}
 
 	@Test
+	void shouldReturn404WhenPetDoesNotExist() throws Exception {
+		given(petService.findPetById(99999)).willReturn(null);
+
+		mockMvc.perform(get("/api/pets/{id}", 99999).accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.title").value("Recurso no encontrado"));
+	}
+
+	@Test
+	void shouldReturn400WhenIdIsNotANumber() throws Exception {
+		// Antes caia en el catch-all de GlobalExceptionHandler y respondia 500.
+		mockMvc.perform(get("/api/pets/{id}", "abc").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.title").value("Peticion no valida"));
+	}
+
+	@Test
+	void shouldReturn400WhenBodyIsNotJson() throws Exception {
+		// Antes caia en el catch-all de GlobalExceptionHandler y respondia 500.
+		mockMvc.perform(post("/api/pets")
+				.contentType(MediaType.APPLICATION_JSON)
+				.with(csrf())
+				.content("{ esto no es json"))
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
 	void shouldCreatePetAndPassBodyToService() throws Exception {
 		Pet request = new Pet();
 		request.setName("Max");
