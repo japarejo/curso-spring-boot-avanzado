@@ -2,6 +2,9 @@
 
 Guion docente. Duración estimada: **tres sesiones de 120 minutos**.
 
+> **Edición de 40 horas (sesiones de 3 h).** Este módulo se imparte en las [sesiones 11, 12 y 13](../../sesiones/README.md), que
+> tienen su propio guion cronometrado. Este documento sigue siendo la referencia del contenido.
+
 ## Documentos
 
 | Documento | Qué contiene |

@@ -142,6 +142,9 @@ Antes de cada sesión conviene tener:
    docker pull mysql:8.4
    docker pull eclipse-temurin:21-jdk
    docker pull eclipse-temurin:21-jre
+   # Ejercicios añadidos en la edición de 40 h (módulo 5, ejercicios 11 y 13)
+   docker pull tomcat:10.1-jdk21-temurin
+   docker pull postgres:17
    ```
 
 4. Para el módulo 5, la infraestructura construida de antemano:

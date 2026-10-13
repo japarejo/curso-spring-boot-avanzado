@@ -2,6 +2,9 @@
 
 Guion docente. Duración estimada: **dos sesiones de 120 minutos**.
 
+> **Edición de 40 horas (sesiones de 3 h).** Este módulo se imparte en las [sesiones 5 y 6](../../sesiones/README.md), que
+> tienen su propio guion cronometrado. Este documento sigue siendo la referencia del contenido.
+
 ## Objetivos
 
 - Distinguir identificación, autenticación y autorización.

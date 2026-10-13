@@ -2,6 +2,9 @@
 
 Guion docente. Duración estimada: **una sesión de 120 minutos**.
 
+> **Edición de 40 horas (sesiones de 3 h).** Este módulo se imparte en las [sesión 1](../../sesiones/sesion-01.md), que
+> tienen su propio guion cronometrado. Este documento sigue siendo la referencia del contenido.
+
 ## Objetivos
 
 Al terminar, el alumnado debe ser capaz de:

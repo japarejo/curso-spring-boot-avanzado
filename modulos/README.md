@@ -11,16 +11,25 @@ En Windows, los comandos traducidos a PowerShell y las siete trampas de la conso
 
 ## Los seis módulos
 
-| # | Módulo | Sesiones | Documentos |
+| # | Módulo | Sesiones (edición de 40 h) | Documentos |
 |---|---|---|---|
-| 1 | [Introducción a Spring Boot](01-introduccion-spring-boot/) | 1 | guion, 5 ejercicios |
-| 2 | [APIs REST avanzadas](02-apis-rest/) | 2 | guion, 7 ejercicios |
-| 3 | [Seguridad](03-seguridad/) | 2 (+1 opcional de ACL) | guion, 7 ejercicios, guion de ACL |
-| 4 | [Pruebas](04-pruebas/) | 2 (+1 opcional de Testcontainers) | guion de clases, 12 ejercicios, guion de Testcontainers |
-| 5 | [Configuración y despliegue](05-configuracion-despliegue/) | 3 | guion de configurabilidad, 8 ejercicios |
-| 6 | [Spring Data y JPA](06-spring-data-jpa/) | 3 (+2 laboratorios opcionales) | guion de acceso a datos, guion de transacciones, guion de N+1, 7 ejercicios, laboratorio de Criteria API, laboratorio de transacciones avanzadas |
+| 1 | [Introducción a Spring Boot](01-introduccion-spring-boot/) | [1](../sesiones/sesion-01.md) | guion, 10 ejercicios |
+| 2 | [APIs REST avanzadas](02-apis-rest/) | [2](../sesiones/sesion-02.md), [3](../sesiones/sesion-03.md), [4](../sesiones/sesion-04.md) | guion, 14 ejercicios |
+| 3 | [Seguridad](03-seguridad/) | [5](../sesiones/sesion-05.md), [6](../sesiones/sesion-06.md) | guion, 14 ejercicios, guion de ACL |
+| 4 | [Pruebas](04-pruebas/) | [7](../sesiones/sesion-07.md), [8](../sesiones/sesion-08.md) | guion de clases, 18 ejercicios, guion de Testcontainers |
+| 5 | [Configuración y despliegue](05-configuracion-despliegue/) | [9](../sesiones/sesion-09.md), [10](../sesiones/sesion-10.md) | guion de configurabilidad, 13 ejercicios |
+| 6 | [Spring Data y JPA](06-spring-data-jpa/) | [11](../sesiones/sesion-11.md), [12](../sesiones/sesion-12.md), [13](../sesiones/sesion-13.md) | guion de acceso a datos, guion de transacciones, guion de N+1, 12 ejercicios, laboratorio de Criteria API, laboratorio de transacciones avanzadas |
+| — | [Reto integrador](reto-integrador.md) | presentado en la 13, revisado en la [14](../sesiones/sesion-14.md) | enunciado y lista de comprobación |
 
-Total: **13 sesiones** de contenido obligatorio más 2 opcionales.
+**Edición de 40 horas:** 13 sesiones de 3 horas y una final de 1 hora. El calendario completo,
+con los guiones cronometrados de cada sesión, está en [`../sesiones/`](../sesiones/).
+
+Los guiones docentes de cada módulo (`README.md`, `guion-*.md`) se escribieron para sesiones
+de 2 horas y se conservan como referencia temática. **Para impartir, seguir los guiones de
+`sesiones/`**, que reparten ese material en bloques de 3 horas.
+
+Cada `ejercicios.md` tiene una segunda parte, «Ejercicios añadidos para la edición de 40
+horas», que cubre lo que las transparencias explicaban y no tenía práctica.
 
 ## Cómo usar este material
 

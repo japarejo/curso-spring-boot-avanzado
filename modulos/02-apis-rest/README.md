@@ -2,6 +2,9 @@
 
 Guion docente. Duración estimada: **dos sesiones de 120 minutos**.
 
+> **Edición de 40 horas (sesiones de 3 h).** Este módulo se imparte en las [sesiones 2, 3 y 4](../../sesiones/README.md), que
+> tienen su propio guion cronometrado. Este documento sigue siendo la referencia del contenido.
+
 ## Objetivos
 
 - Diseñar URIs y respuestas conformes a los principios REST.
@@ -67,8 +70,9 @@ curl -s localhost:8080/api/pets/1 | jq
 Preguntar: *si mañana renombramos un campo de la entidad, ¿qué les pasa a los clientes?*
 
 > **Mensaje clave.** El DTO no es ceremonia. Es lo que permite que el modelo de dominio y
-> el contrato de la API evolucionen por separado. Y es lo que evita el segundo riesgo del
-> OWASP API Security Top 10, la exposición excesiva de datos.
+> el contrato de la API evolucionen por separado. Y es lo que evita la exposición excesiva de datos,
+> parte del riesgo API3:2023 del OWASP API Security Top 10 (autorización rota a nivel de
+> propiedad).
 
 ### 0:50 – 1:00 · Descanso
 

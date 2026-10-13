@@ -3,6 +3,9 @@
 Guion docente. Duración estimada: **dos sesiones de 120 minutos**, más una opcional de
 Testcontainers.
 
+> **Edición de 40 horas (sesiones de 3 h).** Este módulo se imparte en las [sesiones 7 y 8](../../sesiones/README.md), que
+> tienen su propio guion cronometrado. Este documento sigue siendo la referencia del contenido.
+
 Este módulo es el que llega más rodado: el material detallado ya existe y está probado en
 aula. Este fichero es el índice y la orientación; el detalle está en los tres guiones.
 

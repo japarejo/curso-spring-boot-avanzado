@@ -14,6 +14,16 @@ guiones, ejercicios y soluciones de los seis módulos del temario.
 
 ---
 
+## Edición de 40 horas: por dónde empezar
+
+| Si eres… | Empieza por |
+|---|---|
+| **Docente** | [`sesiones/`](sesiones/): el calendario de 13 sesiones de 3 h + 1 final de 1 h, con un guion cronometrado por sesión |
+| **Alumno o alumna** | [`modulos/00-preparacion-entorno.md`](modulos/00-preparacion-entorno.md) antes de la primera clase, y después el `ejercicios.md` de cada módulo |
+| Quien mantiene las transparencias | [`docs/fe-de-erratas-transparencias.md`](docs/fe-de-erratas-transparencias.md) y [`docs/diapositivas-nuevas.md`](docs/diapositivas-nuevas.md) |
+
+---
+
 ## Arranque en tres órdenes
 
 ```bash
@@ -56,14 +66,15 @@ Las contraseñas se guardan cifradas con BCrypt (`{bcrypt}$2a$10$…`), no en cl
 Cada módulo tiene su carpeta en [`modulos/`](modulos/) con el guion docente, los enunciados
 y las soluciones. La columna "dónde mirar" indica el código que ilustra cada tema.
 
-| # | Módulo | Material | Dónde mirar en el código |
-|---|---|---|---|
-| 1 | Introducción a Spring Boot | [`modulos/01-introduccion-spring-boot/`](modulos/01-introduccion-spring-boot/) | `pom.xml`, `PetclinicApplication`, `configuration/` |
-| 2 | APIs REST avanzadas | [`modulos/02-apis-rest/`](modulos/02-apis-rest/) | `web/api/`, `apiclients/` |
-| 3 | Seguridad | [`modulos/03-seguridad/`](modulos/03-seguridad/) | `configuration/SecurityConfiguration`, `infra/auth-service/` |
-| 4 | Pruebas | [`modulos/04-pruebas/`](modulos/04-pruebas/) | `apps/petclinic-api/src/test/` |
-| 5 | Configuración y despliegue | [`modulos/05-configuracion-despliegue/`](modulos/05-configuracion-despliegue/) | `infra/`, `docker/`, los `application-*.properties` |
-| 6 | Spring Data y JPA | [`modulos/06-spring-data-jpa/`](modulos/06-spring-data-jpa/) | `model/`, `repository/`, `service/`, `db/migration/` |
+| # | Módulo | Sesiones | Material | Dónde mirar en el código |
+|---|---|---|---|---|
+| 1 | Introducción a Spring Boot | 1 | [`modulos/01-introduccion-spring-boot/`](modulos/01-introduccion-spring-boot/) | `pom.xml`, `PetclinicApplication`, `configuration/`, [`practicas/tareas`](practicas/tareas/) |
+| 2 | APIs REST avanzadas | 2–4 | [`modulos/02-apis-rest/`](modulos/02-apis-rest/) | `web/api/`, `apiclients/` |
+| 3 | Seguridad | 5–6 | [`modulos/03-seguridad/`](modulos/03-seguridad/) | `configuration/SecurityConfiguration`, `infra/auth-service/` |
+| 4 | Pruebas | 7–8 | [`modulos/04-pruebas/`](modulos/04-pruebas/) | `apps/petclinic-api/src/test/`, [`postman/`](postman/) |
+| 5 | Configuración y despliegue | 9–10 | [`modulos/05-configuracion-despliegue/`](modulos/05-configuracion-despliegue/) | `infra/`, `docker/`, los `application-*.properties` |
+| 6 | Spring Data y JPA | 11–13 | [`modulos/06-spring-data-jpa/`](modulos/06-spring-data-jpa/) | `model/`, `repository/`, `service/`, `db/migration/`, [`practicas/mapeos-jpa`](practicas/mapeos-jpa/) |
+| — | Cierre y [reto integrador](modulos/reto-integrador.md) | 14 (1 h) | [`sesiones/sesion-14.md`](sesiones/sesion-14.md) | todo |
 
 Antes de la primera clase: [`modulos/00-preparacion-entorno.md`](modulos/00-preparacion-entorno.md).
 
@@ -101,7 +112,13 @@ curso-spring-boot-avanzado/
 │   ├── auth-service/        Autenticación JWT           :8060
 │   └── bills-service/       Servicio cliente de la demo :8040
 ├── docker/                  Dockerfile y compose.yaml
-└── modulos/                 Guiones, ejercicios y soluciones
+├── modulos/                 Guiones temáticos, ejercicios y soluciones
+├── sesiones/                Guiones cronometrados de la edición de 40 h (14 sesiones)
+├── practicas/               Proyectos independientes, cada uno con su Maven embebido
+│   ├── tareas/              La aplicación "desde cero" del módulo 1 (se reutiliza en 3 y 6)
+│   └── mapeos-jpa/          Laboratorio de mapeos JPA del módulo 6
+├── postman/                 Colección y entorno de Postman/Newman (módulo 4)
+└── docs/                    Fe de erratas y diapositivas nuevas propuestas
 ```
 
 ### Perfiles de la aplicación
