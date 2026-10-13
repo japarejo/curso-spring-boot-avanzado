@@ -175,3 +175,323 @@ combinación que el navegador rechaza?
 **Pregunta de cierre.** ¿En qué casos usarías Spring Data REST en un proyecto real? ¿Qué
 pierdes frente a controladores escritos a mano? *(Control del contrato, DTOs, validación
 específica, versionado.)*
+
+---
+
+# Ejercicios añadidos para la edición de 40 horas
+
+Cubren lo que las transparencias explican y los siete ejercicios anteriores no practicaban:
+diseño de URIs y semántica de los métodos (diapositivas 36–53), *binding* de parámetros
+(54–58), cabeceras y caché HTTP (40, 57), serialización propia (59–61), conversores (módulo 2,
+«convertidores avanzados y condicionales»), Spring Data REST a fondo (64–67) y OpenAPI a
+fondo (68–70).
+
+---
+
+## Ejercicio 8 · Diseñar antes de programar
+
+**Objetivo.** Aplicar las buenas prácticas de nombrado y la semántica de HTTP a una API real.
+**Diapositivas:** 36–53. **Tiempo:** 20 min, en parejas y **sin ordenador**.
+
+Un compañero ha propuesto estos endpoints para la clínica:
+
+| # | Propuesta |
+|---|---|
+| 1 | `GET /getAllOwners` |
+| 2 | `POST /owners/delete?id=3` |
+| 3 | `GET /owners/3/pets/7/visits/` |
+| 4 | `GET /api/Owner_Pets?ownerId=3` |
+| 5 | `POST /visits/create` |
+| 6 | `PUT /pets/7/rename?name=Leo` |
+| 7 | `GET /vets/listarConEspecialidades` |
+| 8 | `DELETE /owners` |
+| 9 | `GET /api/v1.1/pets` |
+| 10 | `GET /visits?desde=2026-01-01&hasta=2026-01-31&ordenar=fecha&pagina=2` |
+
+1. Para cada uno: ¿qué regla incumple? Propón la versión correcta (método + URI).
+2. Completa la tabla de la diapositiva 49, ampliada:
+
+   | | GET | HEAD | OPTIONS | POST | PUT | PATCH | DELETE |
+   |---|---|---|---|---|---|---|---|
+   | Seguro | | | | | | | |
+   | Idempotente | | | | | | | |
+
+3. Elige el código de estado para cada situación:
+   - se crea una visita;
+   - se borra una mascota que existía;
+   - se pide una mascota que no existe;
+   - el JSON de entrada no valida;
+   - un `owner` intenta ver los datos de otro `owner`;
+   - nadie se ha autenticado;
+   - dos personas editan a la vez la misma mascota y la segunda llega tarde;
+   - el cliente pide `application/xml` y la API solo habla JSON.
+
+4. Comprueba tus respuestas contra la API real con Swagger UI. ¿Qué endpoints actuales del
+   proyecto incumplen alguna de tus reglas?
+
+**Pregunta.** ¿Es un problema la propuesta 10? *(No: los filtros, la ordenación y la
+paginación van en la *query string*. Lo discutible es mezclar idiomas en los nombres de
+parámetros con el resto de la API.)*
+
+Solución: [`soluciones/Ejercicio08DisenoRest.md`](soluciones/Ejercicio08DisenoRest.md)
+
+---
+
+## Ejercicio 9 · *Binding*: todo lo que puede llegar en una petición
+
+**Objetivo.** Recoger parámetros de ruta, de consulta, cabeceras y *cookies*, y aplicar las
+convenciones de filtrado, ordenación, selección de campos y paginación.
+**Diapositivas:** 44, 50–53, 56. **Tiempo:** 40 min.
+
+Crea `web/api/OwnerQueryController` con `GET /api/v1/owners` que acepte:
+
+| Parámetro | Ejemplo | Significado |
+|---|---|---|
+| `city` | `?city=Madison` | filtro exacto |
+| `lastName` | `?lastName=Da` | empieza por |
+| `sort` | `?sort=+lastName,-city` | `+` ascendente, `-` descendente (diapositiva 51) |
+| `fields` | `?fields=firstName,lastName` | solo esos campos (diapositiva 52) |
+| `offset`, `limit` | `?offset=0&limit=3` | paginación (diapositiva 53) |
+
+y además:
+
+- la cabecera `Accept-Language`, con `@RequestHeader`, para devolver un saludo en
+  español o inglés en la cabecera de respuesta `X-Saludo`;
+- una *cookie* `ultimaCiudad` con `@CookieValue(required = false)`, que se usa como
+  valor por defecto de `city` si no llega el parámetro.
+
+> **Ojo con la diapositiva 56.** `@CookieParam` y `@HeaderParam` son anotaciones de
+> **JAX-RS** (Jakarta REST), no de Spring. En Spring MVC son `@CookieValue` y
+> `@RequestHeader`.
+
+Requisitos de calidad:
+
+1. `sort` y `fields` solo admiten una **lista blanca** de propiedades. Cualquier otra da
+   400, no 500 (mira cómo lo hace `RestfulVisitSearchController`).
+2. `limit` tiene un máximo de 50, aunque el cliente pida más.
+3. Pruébalo:
+
+   ```bash
+   curl -s "localhost:8080/api/v1/owners?sort=-lastName&fields=firstName,lastName&limit=3" | jq
+   curl -i -H "Accept-Language: en" "localhost:8080/api/v1/owners?limit=1"
+   curl -s -b "ultimaCiudad=Madison" "localhost:8080/api/v1/owners" | jq length
+   curl -i "localhost:8080/api/v1/owners?sort=password"          # 400
+   ```
+
+**Resultado esperado.** Cada petición devuelve solo lo pedido, ordenado como se pidió, y
+`sort=password` responde 400 con un `ProblemDetail`.
+
+**Pregunta.** ¿Por qué la lista blanca es una medida de **seguridad** y no solo de
+robustez? *(Sin ella, ordenar por un campo oculto permite deducir su valor fila a fila.)*
+
+Solución: [`soluciones/Ejercicio09Binding.java`](soluciones/Ejercicio09Binding.java)
+
+---
+
+## Ejercicio 10 · `ResponseEntity`, cabeceras y caché HTTP
+
+**Objetivo.** Controlar la respuesta completa: estado, cabeceras y peticiones condicionales.
+**Diapositivas:** 40 (*cacheable*), 57. **Tiempo:** 35 min.
+
+Las entidades del proyecto tienen `@Version` (en `BaseEntity`). Es justo lo que hace falta
+para una `ETag`.
+
+1. Haz que `GET /api/v1/pets/{id}` devuelva un `ResponseEntity` con:
+   - `ETag: "<version>"`;
+   - `Cache-Control: max-age=60, private`.
+2. Si la petición trae `If-None-Match` con la misma `ETag`, responde **304 Not Modified**
+   sin cuerpo. (Pista: `WebRequest.checkNotModified(String etag)`.)
+3. Haz que `PUT /api/v1/pets/{id}` exija `If-Match`. Si la versión no coincide, responde
+   **412 Precondition Failed**. Sin la cabecera, **428 Precondition Required**.
+4. Haz que `DELETE` devuelva la cabecera propia de la diapositiva 57.
+5. Prueba la secuencia completa:
+
+   ```bash
+   curl -i localhost:8080/api/v1/pets/1                              # 200 + ETag: "1"
+   curl -i -H 'If-None-Match: "1"' localhost:8080/api/v1/pets/1      # 304
+   curl -i -X PUT -H 'If-Match: "7"' -H 'Content-Type: application/json' \
+        -d '{"id":1,"name":"Leo","birthDate":"2010/09/07","type":"cat","owner":1}' \
+        localhost:8080/api/v1/pets/1                                 # 412
+   ```
+
+**Resultado esperado.** La segunda petición no transfiere cuerpo. El PUT con una versión
+antigua se rechaza **antes** de tocar la base de datos.
+
+**Pregunta.** ¿Qué problema de los vistos en el módulo 6 resuelve el `If-Match`? *(La
+actualización perdida: es bloqueo optimista llevado hasta el cliente HTTP.)*
+
+**Alternativa sin código.** Registra un `ShallowEtagHeaderFilter` y compara. ¿Qué ahorra y
+qué no? *(Ahorra red, pero el servidor sigue generando la respuesta entera para calcular el
+hash.)*
+
+Solución: [`soluciones/Ejercicio10CacheHttp.java`](soluciones/Ejercicio10CacheHttp.java)
+
+---
+
+## Ejercicio 11 · Tu propio serializador
+
+**Objetivo.** Escribir y registrar un par serializador/deserializador Jackson, y conocer la
+configuración global.
+**Diapositivas:** 59–61. **Tiempo:** 35 min.
+
+1. Expón `GET /api/v1/vets` devolviendo `vetService.findVets()`. Observa cómo salen las
+   especialidades: objetos con `id`, `name` y `version`.
+2. Escribe `SpecialtyJson` con dos clases internas, `Serializer` y `Deserializer`, que
+   representen una especialidad **por su nombre**: `"specialties": ["radiology", "surgery"]`.
+   Regístralas con `@JsonComponent` en lugar de anotar el campo con `@JsonSerialize`.
+3. Compara con `PetTypeSerializer`/`PetTypeDeserializer`, que el proyecto registra campo a
+   campo. ¿Qué cambia? ¿Qué riesgo tiene registrar globalmente?
+4. Ahora experimenta con la configuración **global** de Jackson, una propiedad cada vez, y
+   mira qué le pasa a **toda** la API:
+
+   ```properties
+   spring.jackson.property-naming-strategy=SNAKE_CASE
+   spring.jackson.default-property-inclusion=non_null
+   spring.jackson.serialization.indent-output=true
+   ```
+
+**Resultado esperado.** Con `@JsonComponent`, todas las especialidades del sistema salen como
+texto en cualquier respuesta. Con `SNAKE_CASE`, `birthDate` pasa a `birth_date`… y todos los
+clientes existentes se rompen.
+
+> **Mensaje clave.** La configuración global de Jackson cambia el contrato de **toda** la
+> API de golpe. Úsala al principio del proyecto o no la uses.
+
+**Nota para 4.x.** Spring Boot 4 usa Jackson 3: el paquete pasa de `com.fasterxml.jackson` a
+`tools.jackson`, y `@JsonComponent` pasa a llamarse `@JacksonComponent`.
+
+Solución: [`soluciones/Ejercicio11SerializadorPropio.java`](soluciones/Ejercicio11SerializadorPropio.java)
+
+---
+
+## Ejercicio 12 · Conversores: de texto a objetos de dominio
+
+**Objetivo.** Entender el `ConditionalGenericConverter` del proyecto y escribir un conversor
+propio.
+**Temario:** «Convertidores avanzados y condicionales». **Tiempo:** 30 min.
+
+1. Lee `configuration/GenericIdToEntityConverter`. Responde: ¿para qué pares de tipos se
+   ofrece? ¿Qué decide `matches()`? ¿De dónde saca la entidad?
+2. Compruébalo en vivo. Añade temporalmente este endpoint:
+
+   ```java
+   @GetMapping("/api/v1/demo/pets/{pet}")
+   public String demo(@PathVariable("pet") Pet pet) {
+       return pet == null ? "no existe" : pet.getName();
+   }
+   ```
+
+   y pide `/api/v1/demo/pets/1`. Ningún código ha llamado al repositorio: lo hizo el
+   conversor.
+3. Escribe un conversor propio `Converter<String, RangoFechas>`, donde
+   `record RangoFechas(LocalDate desde, LocalDate hasta)`, que acepte:
+   - `2013-01-01..2013-01-31`
+   - `ultimos-30-dias`
+   - `este-anio`
+4. Úsalo en `GET /api/v1/visits/rango?rango=...` delegando en `VisitService.search(...)`.
+5. Un rango mal escrito debe dar **400**, no 500.
+
+**Resultado esperado.** El controlador recibe directamente un `RangoFechas`, sin una línea de
+análisis de texto.
+
+**Preguntas.**
+- ¿Qué diferencia hay entre un `Converter` y un `Formatter`? *(El `Formatter` es
+  bidireccional y sensible a la configuración regional: sirve también para pintar el valor
+  en una vista. `PetTypeFormatter` es un ejemplo.)*
+- ¿Qué riesgo tiene `GenericIdToEntityConverter`? *(Cualquier entidad se carga a partir de
+  un número que manda el cliente: combinado con una autorización descuidada, es el primer
+  riesgo del OWASP API Top 10.)*
+
+Solución: [`soluciones/Ejercicio12Conversores.java`](soluciones/Ejercicio12Conversores.java)
+
+---
+
+## Ejercicio 13 · Spring Data REST a fondo
+
+**Objetivo.** Ir más allá del ejercicio 7: rutas, proyecciones por defecto, búsquedas,
+ocultación de operaciones y eventos.
+**Diapositivas:** 64–67. **Tiempo:** 40 min. **Requisito:** ejercicio 7.
+
+1. Añade `spring-boot-starter-data-rest` (la diapositiva 65 muestra por error
+   `spring-data-jpa`) y, opcionalmente, `spring-data-rest-hal-explorer`.
+2. Configura:
+
+   ```properties
+   spring.data.rest.base-path=/data-api
+   spring.data.rest.detection-strategy=annotated
+   ```
+
+   y abre `/data-api/**` en `SecurityConfiguration` (la regla final es `denyAll()`).
+3. Anota `VetRepository` con
+   `@RepositoryRestResource(path = "veterinarios", collectionResourceRel = "veterinarios", excerptProjection = VetResumen.class)`.
+4. Crea la proyección `VetResumen` con nombre, apellido y número de especialidades
+   (`@Value("#{target.nrOfSpecialties}")`).
+5. Añade un método de búsqueda y localízalo en `/data-api/veterinarios/search`:
+
+   ```java
+   List<Vet> findByLastNameStartingWithIgnoreCase(@Param("apellido") String apellido);
+   ```
+
+6. Impide que se pueda borrar por la API: redeclara `deleteById` con
+   `@RestResource(exported = false)`. Comprueba que `DELETE` da 405.
+7. Añade un `@RepositoryEventHandler` que registre en el log cada alta (`@HandleAfterCreate`).
+
+```bash
+curl -s localhost:8080/data-api | jq
+curl -s localhost:8080/data-api/veterinarios | jq '._embedded.veterinarios[0]'
+curl -s "localhost:8080/data-api/veterinarios/search/findByLastNameStartingWithIgnoreCase?apellido=or" | jq
+curl -i -X DELETE localhost:8080/data-api/veterinarios/1          # 405
+```
+
+**Resultado esperado.** El listado usa la proyección resumida; el detalle, la entidad
+completa; el `DELETE` no está disponible.
+
+**Pregunta de cierre.** Compara el esfuerzo con el `OwnerQueryController` del ejercicio 9.
+¿Qué controlas en uno y no en otro?
+
+Solución: [`soluciones/Ejercicio13SpringDataRest.java`](soluciones/Ejercicio13SpringDataRest.java)
+
+---
+
+## Ejercicio 14 · OpenAPI a fondo
+
+**Objetivo.** Que la documentación generada sea un contrato utilizable, no un listado de
+rutas.
+**Diapositivas:** 68–70. **Tiempo:** 40 min.
+
+1. Mira el estado actual: <http://localhost:8080/swagger-ui.html> y `/v3/api-docs`.
+2. Completa la definición global en `OpenApi30Config`: descripción, contacto, licencia y
+   servidores (el equivalente programático de `@OpenAPIDefinition`, diapositiva 69).
+3. Declara un esquema de seguridad `bearer` JWT (`@SecurityScheme`) y exige
+   `@SecurityRequirement` en las operaciones de escritura (diapositiva 70). Comprueba que
+   aparece el botón **Authorize** y pega un token de `auth-service` (módulo 3).
+4. Documenta los errores con su esquema real: `@ApiResponse(responseCode = "404", content =
+   @Content(schema = @Schema(implementation = ProblemDetail.class)))`.
+5. Separa la documentación en dos grupos con `GroupedOpenApi`: `v1` (`/api/v1/**`) y
+   `legado` (`/api/pets/**`, `/api/v2/**`).
+6. Oculta el endpoint de demostración del ejercicio 12 con `@Hidden`.
+7. Mueve las rutas por propiedades y ordena la interfaz:
+
+   ```properties
+   springdoc.api-docs.path=/api-docs
+   springdoc.swagger-ui.path=/docs
+   springdoc.swagger-ui.operations-sorter=method
+   springdoc.swagger-ui.tags-sorter=alpha
+   ```
+
+   No olvides actualizar `SecurityConfiguration`: la regla de Swagger apunta a las rutas
+   antiguas.
+8. Exporta el contrato y valídalo:
+
+   ```bash
+   curl -s localhost:8080/api-docs.yaml/v1 > openapi-v1.yaml     # un documento por grupo
+   npx @redocly/cli lint openapi-v1.yaml
+   ```
+
+**Resultado esperado.** Swagger UI muestra dos grupos, el botón *Authorize* y los errores con
+su esquema `ProblemDetail`. El *linter* da menos avisos que con la configuración inicial.
+
+**Pregunta.** ¿Documentación generada desde el código (*code first*) o código generado desde
+el contrato (*contract first*)? ¿Cuándo cada una?
+
+Solución: [`soluciones/Ejercicio14OpenApi.java`](soluciones/Ejercicio14OpenApi.java)

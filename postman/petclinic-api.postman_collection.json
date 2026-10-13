@@ -1,0 +1,448 @@
+{
+  "info": {
+    "_postman_id": "18f8d89e-b12f-5a65-9636-14dc15c95b71",
+    "name": "PetClinic API - curso Spring Boot avanzado",
+    "description": "Coleccion del modulo 4, ejercicio 17. Se ejecuta en orden: 'Crear visita' guarda el id que usa 'Leer la visita creada'.\n\nCon Newman:\n\n    npx newman run postman/petclinic-api.postman_collection.json -e postman/local.postman_environment.json\n\nLa carpeta 'Autenticacion' necesita auth-service en marcha; para excluirla: --folder Visitas --folder Mascotas",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Visitas",
+      "item": [
+        {
+          "name": "Listar visitas paginadas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/visits?size=2&sort=date,desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "visits"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "2"
+                },
+                {
+                  "key": "sort",
+                  "value": "date,desc"
+                }
+              ]
+            },
+            "description": "Paginacion, ordenacion y enlaces (modulo 2). Ver RestfulVisitSearchController."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Devuelve como mucho 2 visitas', () => pm.expect(json.content.length).to.be.at.most(2));",
+                  "pm.test('Trae metadatos de pagina', () => {",
+                  "  pm.expect(json.page).to.have.property('totalElements');",
+                  "  pm.expect(json.page.size).to.eql(2);",
+                  "});",
+                  "pm.test('Trae enlace a la pagina siguiente', () => pm.expect(json.links).to.have.property('next'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear visita",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/visits",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "visits"
+              ]
+            },
+            "description": "Crea una visita y guarda su id en la variable visitaId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"{{descripcionVisita}}\",\n  \"petId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Descripcion unica en cada ejecucion para no confundir visitas",
+                  "pm.collectionVariables.set('descripcionVisita', 'Revision Postman ' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('Cabecera Location', () => pm.response.to.have.header('Location'));",
+                  "const json = pm.response.json();",
+                  "pm.test('Devuelve la visita creada', () => pm.expect(json.description).to.eql(pm.collectionVariables.get('descripcionVisita')));",
+                  "// Se guarda el id para la peticion siguiente",
+                  "pm.collectionVariables.set('visitaId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Leer la visita creada",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/visits/{{visitaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "visits",
+                "{{visitaId}}"
+              ]
+            },
+            "description": "Usa la variable visitaId que fijo la peticion anterior."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Es la visita recien creada', () => pm.expect(pm.response.json().description).to.eql(pm.collectionVariables.get('descripcionVisita')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear visita sin descripcion (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/visits",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "visits"
+              ]
+            },
+            "description": "Validacion de entrada (modulo 2).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('Es un ProblemDetail', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json'));",
+                  "pm.test('El detalle menciona el campo', () => pm.expect(pm.response.json().detail).to.include('description'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ordenar por un campo no permitido (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/visits?sort=unknown",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "visits"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "unknown"
+                }
+              ]
+            },
+            "description": "La lista blanca de campos de ordenacion."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 y no 500', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mascotas",
+      "item": [
+        {
+          "name": "Listar mascotas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pets"
+              ]
+            },
+            "description": "Si hiciste el ejercicio 1 del modulo 2, la ruta es /api/v1/pets."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Hay mascotas', () => pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty);",
+                  "pm.test('Responde en menos de 1 s', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mascota inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pets/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pets",
+                "99999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Autenticacion",
+      "item": [
+        {
+          "name": "Pedir token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{authUrl}}/api/v1/auth/login",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Necesita auth-service arrancado: ./mvnw -pl infra/auth-service spring-boot:run",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin1\",\n  \"password\": \"4dm1n\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Trae un JWT de tres partes', () => pm.expect(json.token.split('.')).to.have.lengthOf(3));",
+                  "pm.collectionVariables.set('token', json.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validar token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{authUrl}}/api/v1/auth/validate",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "validate"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El token es valido', () => pm.expect(pm.response.json().valid).to.be.true);",
+                  "pm.test('Es de admin1', () => pm.expect(pm.response.json().username).to.eql('admin1'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Credenciales incorrectas (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{authUrl}}/api/v1/auth/login",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin1\",\n  \"password\": \"mala\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 Unauthorized', () => pm.response.to.have.status(401));",
+                  "pm.test('Mensaje generico, sin pistas', () => pm.expect(pm.response.json().detail).to.not.include('admin1'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "visitaId",
+      "value": ""
+    },
+    {
+      "key": "descripcionVisita",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}

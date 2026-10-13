@@ -1,0 +1,68 @@
+# =============================================================================
+#  Modulo 5 - Ejercicio 12: Dockerfile desde cero para practicas/tareas.
+#
+#  SOLUCION DE REFERENCIA. Copiar como practicas/tareas/Dockerfile.
+#
+#  Version 1 (una etapa): necesita haber ejecutado antes `./mvnw package`.
+#    docker build --tag=tareas:latest .
+#    docker run --rm -p 8887:8080 tareas:latest
+#
+#  La diapositiva 145 decia:
+#    FROM openjdk:8-jdk-alpine
+#    COPY target/app-name-1.0.0.jar app-name-1.0.0.jar
+#    ENTRYPOINT ["java","-jar","/app-name-1.0.0.jar"]
+#  Problemas: Java 8 (Spring Boot 3 exige 17+), imagen `openjdk` retirada,
+#  JDK completo para solo ejecutar, version en el nombre y ejecucion como root.
+# =============================================================================
+
+FROM eclipse-temurin:21-jre
+
+# curl para el HEALTHCHECK (la imagen base no lo trae)
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Usuario sin privilegios: si alguien explota la aplicacion, no es root.
+RUN useradd --system --create-home --uid 10001 app
+USER app
+WORKDIR /home/app
+
+# Nombre fijo: el ENTRYPOINT no cambia en cada version.
+COPY --chown=app:app target/tareas-*.jar app.jar
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=15s --timeout=3s --start-period=30s --retries=3 \
+    CMD curl -fsS http://localhost:8080/actuator/health || exit 1
+
+# exec form ([...]): java es el PID 1 y recibe SIGTERM al hacer `docker stop`,
+# asi Spring Boot puede cerrar ordenadamente.
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+
+# =============================================================================
+#  Version 2 (multietapa): compila DENTRO del contenedor. Guardar como
+#  Dockerfile.multietapa y construir con
+#    docker build -f Dockerfile.multietapa --tag=tareas:multi .
+# =============================================================================
+#
+# FROM eclipse-temurin:21-jdk AS build
+# WORKDIR /src
+# COPY .mvn/ .mvn/
+# COPY mvnw pom.xml ./
+# # Capa de dependencias: solo se repite si cambia el pom.xml
+# RUN --mount=type=cache,target=/root/.m2 sed -i 's/\r$//' mvnw && chmod +x mvnw \
+#     && ./mvnw -B dependency:go-offline
+# COPY src/ src/
+# RUN --mount=type=cache,target=/root/.m2 ./mvnw -B package -DskipTests
+#
+# FROM eclipse-temurin:21-jre
+# RUN useradd --system --uid 10001 app
+# USER app
+# WORKDIR /app
+# COPY --from=build /src/target/tareas-*.jar app.jar
+# EXPOSE 8080
+# ENTRYPOINT ["java", "-jar", "app.jar"]
+#
+# Diferencias con docker/Dockerfile del curso: aquel sirve para CUALQUIER modulo
+# del reactor (ARG MODULE) y conserva la extension (.jar o .war). Este es para
+# un proyecto suelto, que es el caso mas habitual fuera del curso.

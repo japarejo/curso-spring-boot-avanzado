@@ -2,11 +2,9 @@
 
 Estos ejercicios se hacen dentro del proyecto `apps/petclinic-api`.
 
-Antes de empezar, abre una terminal en:
-
-```text
-apps\petclinic-api
-```
+Antes de empezar, abre una terminal en la **raíz del repositorio** (donde está `mvnw.cmd`).
+Todos los comandos llevan `-pl apps/petclinic-api` para actuar solo sobre la aplicación.
+En Linux o macOS, cambia `.\mvnw.cmd` por `./mvnw`.
 
 ## Ficheros de referencia
 
@@ -72,35 +70,35 @@ Por que esta clase es buena para practicar:
 
 Informes:
 
-- Surefire XML/TXT: `target/surefire-reports`
-- Surefire HTML: `target/reports/surefire.html`
-- JaCoCo HTML: `target/site/jacoco/index.html`
+- Surefire XML/TXT: `apps/petclinic-api/target/surefire-reports`
+- Surefire HTML: `apps/petclinic-api/target/reports/surefire.html`
+- JaCoCo HTML: `apps/petclinic-api/target/site/jacoco/index.html`
 
 ## Comandos utiles
 
 Ejecutar todos los tests del aplicacion:
 
 ```powershell
-.\mvnw.cmd test
+.\mvnw.cmd -pl apps/petclinic-api test
 ```
 
 Ejecutar solo una clase de test:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 Generar informe HTML de Surefire a partir de los resultados existentes:
 
 ```powershell
-.\mvnw.cmd surefire-report:report -DskipTests
+.\mvnw.cmd -pl apps/petclinic-api surefire-report:report -DskipTests
 ```
 
 Cuando un ejercicio pida revisar informes, ejecuta primero:
 
 ```powershell
-.\mvnw.cmd test
-.\mvnw.cmd surefire-report:report -DskipTests
+.\mvnw.cmd -pl apps/petclinic-api test
+.\mvnw.cmd -pl apps/petclinic-api surefire-report:report -DskipTests
 ```
 
 ## Bloque 1: JUnit 5 y cobertura
@@ -115,15 +113,15 @@ Objetivo:
 Ficheros a abrir:
 
 - `src/test/java/org/springframework/samples/petclinic/testingexamples/PetAppointmentAdvisorTests.java`
-- `target/reports/surefire.html`
-- `target/site/jacoco/index.html`
+- `apps/petclinic-api/target/reports/surefire.html`
+- `apps/petclinic-api/target/site/jacoco/index.html`
 
 Pasos:
 
 1. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 2. Comprueba en consola que aparece algo similar a:
@@ -136,7 +134,7 @@ BUILD SUCCESS
 3. Abre el fichero:
 
 ```text
-target/surefire-reports/org.springframework.samples.petclinic.testingexamples.PetAppointmentAdvisorTests.txt
+apps/petclinic-api/target/surefire-reports/org.springframework.samples.petclinic.testingexamples.PetAppointmentAdvisorTests.txt
 ```
 
 4. Localiza el resumen de tests ejecutados, fallos y skipped.
@@ -144,19 +142,19 @@ target/surefire-reports/org.springframework.samples.petclinic.testingexamples.Pe
 5. Genera el informe HTML:
 
 ```powershell
-.\mvnw.cmd surefire-report:report -DskipTests
+.\mvnw.cmd -pl apps/petclinic-api surefire-report:report -DskipTests
 ```
 
 6. Abre:
 
 ```text
-target/reports/surefire.html
+apps/petclinic-api/target/reports/surefire.html
 ```
 
 7. Abre:
 
 ```text
-target/site/jacoco/index.html
+apps/petclinic-api/target/site/jacoco/index.html
 ```
 
 8. En JaCoCo entra en:
@@ -226,13 +224,13 @@ void shouldTreatNullSymptomAsRoutineCheckup() {
 3. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 4. Abre de nuevo JaCoCo:
 
 ```text
-target/site/jacoco/index.html
+apps/petclinic-api/target/site/jacoco/index.html
 ```
 
 5. Entra en `PetAppointmentAdvisor` y observa si hay menos amarillo/rojo en la rama de `containsEmergencyKeyword`.
@@ -293,19 +291,19 @@ void shouldClassifyBoundaryAges(int age, String symptom, AppointmentType expecte
 4. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 5. Genera Surefire HTML:
 
 ```powershell
-.\mvnw.cmd surefire-report:report -DskipTests
+.\mvnw.cmd -pl apps/petclinic-api surefire-report:report -DskipTests
 ```
 
 6. Abre:
 
 ```text
-target/reports/surefire.html
+apps/petclinic-api/target/reports/surefire.html
 ```
 
 Resultado esperado:
@@ -363,7 +361,7 @@ void shouldRejectMissingPetName() {
 4. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 Resultado esperado:
@@ -405,19 +403,19 @@ void disabledPuppyRuleExample() {
 3. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 4. Genera Surefire HTML:
 
 ```powershell
-.\mvnw.cmd surefire-report:report -DskipTests
+.\mvnw.cmd -pl apps/petclinic-api surefire-report:report -DskipTests
 ```
 
 5. Abre:
 
 ```text
-target/reports/surefire.html
+apps/petclinic-api/target/reports/surefire.html
 ```
 
 Resultado esperado:
@@ -479,7 +477,7 @@ void shouldFindOwnersByLastNamePrefix() {
 3. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=OwnerRepositoryJpaSliceTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=OwnerRepositoryJpaSliceTests" test
 ```
 
 Resultado esperado:
@@ -551,7 +549,7 @@ void shouldNotFindRollbackDemoOwnerFromAnotherTest() {
 4. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=OwnerRepositoryJpaSliceTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=OwnerRepositoryJpaSliceTests" test
 ```
 
 Resultado esperado:
@@ -612,7 +610,7 @@ void shouldShowFindOwnersForm() throws Exception {
 3. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=OwnerControllerMvcSliceTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=OwnerControllerMvcSliceTests" test
 ```
 
 Resultado esperado:
@@ -683,7 +681,7 @@ void shouldRedirectWhenFindOwnerReturnsOneResult() throws Exception {
 4. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=OwnerControllerMvcSliceTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=OwnerControllerMvcSliceTests" test
 ```
 
 Resultado esperado:
@@ -711,7 +709,7 @@ Pasos:
 1. Ejecuta la clase tal como esta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=DirtiesContextExampleTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=DirtiesContextExampleTests" test
 ```
 
 Resultado esperado:
@@ -736,7 +734,7 @@ void shouldMarkContextAsDirtyAfterMutatingSingletonBean()
 5. Ejecuta de nuevo:
 
 ```powershell
-.\mvnw.cmd "-Dtest=DirtiesContextExampleTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=DirtiesContextExampleTests" test
 ```
 
 Resultado esperado:
@@ -753,7 +751,7 @@ Resultado esperado:
 7. Ejecuta de nuevo para confirmar que todo pasa:
 
 ```powershell
-.\mvnw.cmd "-Dtest=DirtiesContextExampleTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=DirtiesContextExampleTests" test
 ```
 
 Resultado final esperado:
@@ -804,7 +802,7 @@ void shouldRecommendSameDayWhenSeniorPetDoesNotEat() {
 3. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 Resultado esperado en este punto:
@@ -847,7 +845,7 @@ Pistas:
 8. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 Resultado esperado:
@@ -869,7 +867,7 @@ void shouldKeepEmergencyPriorityOverDoesNotEatRule() {
 10. Ejecuta:
 
 ```powershell
-.\mvnw.cmd "-Dtest=PetAppointmentAdvisorTests" test
+.\mvnw.cmd -pl apps/petclinic-api "-Dtest=PetAppointmentAdvisorTests" test
 ```
 
 Resultado esperado:
@@ -882,13 +880,13 @@ Parte 4: revisar cobertura
 11. Ejecuta:
 
 ```powershell
-.\mvnw.cmd test
+.\mvnw.cmd -pl apps/petclinic-api test
 ```
 
 12. Abre:
 
 ```text
-target/site/jacoco/index.html
+apps/petclinic-api/target/site/jacoco/index.html
 ```
 
 13. Entra en:
@@ -946,8 +944,8 @@ Resultado esperado:
 Ejecuta:
 
 ```powershell
-.\mvnw.cmd test
-.\mvnw.cmd surefire-report:report -DskipTests
+.\mvnw.cmd -pl apps/petclinic-api test
+.\mvnw.cmd -pl apps/petclinic-api surefire-report:report -DskipTests
 ```
 
 Resultado esperado global:
@@ -956,3 +954,254 @@ Resultado esperado global:
 - No hay failures ni errors.
 - Puede haber skipped por los tests deshabilitados.
 - Los informes estan actualizados.
+
+---
+
+# Ejercicios añadidos para la edición de 40 horas
+
+Cubren lo que las transparencias explican y los doce ejercicios anteriores no practicaban:
+dobles de prueba con Mockito (diapositivas 106–112 y 116–118), organización de las pruebas
+con JUnit 5 (101–103), pruebas de seguridad (132), REST Assured contra la API propia
+(124–130), Postman/Newman (131) y el problema de los dobles de servicios externos (122–123).
+
+Se ejecutan desde la raíz del repositorio. En Linux o macOS, `./mvnw` en lugar de `.\mvnw.cmd`.
+
+---
+
+## Ejercicio 13 · Dobles de prueba con Mockito
+
+**Objetivo.** Usar los cinco tipos de doble y las verificaciones de Mockito sobre un servicio
+real, sin levantar Spring.
+**Diapositivas:** 106–112, 116–118. **Tiempo:** 45 min.
+
+`PetService` recibe sus dos repositorios por **constructor**, así que se puede probar con
+`new`, sin reflexión (compáralo con `OwnerServiceIsolatedMockTests`, que necesita
+`ReflectionTestUtils` porque `OwnerService` mezcla estilos).
+
+Crea `src/test/java/.../service/PetServiceMockitoTests.java` con
+`@ExtendWith(MockitoExtension.class)`, `@Mock` para los dos repositorios y `@InjectMocks`
+para el servicio. Escribe una prueba para cada punto:
+
+| # | Qué probar | Técnica de Mockito |
+|---|---|---|
+| 1 | `findPetById(7)` devuelve lo que da el repositorio | *stub*: `when(...).thenReturn(...)` |
+| 2 | `findPetTypes()` no toca `VisitRepository` | `verifyNoInteractions(visitRepository)` |
+| 3 | `deletePet(7)` llama **una vez** a `deleteById(7)` y a nada más | `verify(..., times(1))` + `verifyNoMoreInteractions` |
+| 4 | `saveVisit(v)` guarda **exactamente** la visita recibida | `ArgumentCaptor<Visit>` |
+| 5 | Si el repositorio falla al buscar, la excepción se propaga | saboteador: `thenThrow(...)` |
+| 6 | Si `save` (que es `void`) falla, la excepción se propaga | `doThrow(...).when(repo).save(any())` |
+| 7 | Guardar una mascota con nombre repetido en el mismo dueño lanza `DuplicatedPetNameException` **y no guarda** | `assertThrows` + `verify(..., never())` |
+| 8 | Un *spy* sobre una lista real: `add` funciona, pero `size()` devuelve 100 | `spy(...)` + `doReturn(100).when(spy).size()` |
+
+**Resultado esperado.** Ocho pruebas en verde en menos de un segundo. Ninguna toca la base de
+datos ni levanta un contexto de Spring.
+
+**Preguntas.**
+- La prueba 7 necesita construir un `Owner` con dos mascotas. ¿Es un *dummy*, un *stub* o
+  un *fake*? *(Ninguno: son objetos reales del dominio. No todo lo que aparece en una prueba
+  tiene que ser un doble.)*
+- ¿Por qué `when(repo.save(x)).thenThrow(...)` no compila en el punto 6?
+
+Solución: [`soluciones/Ejercicio13PetServiceMockitoTests.java`](soluciones/Ejercicio13PetServiceMockitoTests.java)
+
+---
+
+## Ejercicio 14 · Pruebas que se leen como una especificación
+
+**Objetivo.** Organizar una batería con `@Nested`, `@DisplayName`, `assertAll` y
+suposiciones.
+**Diapositivas:** 101–103. **Tiempo:** 30 min.
+
+Reescribe las pruebas de `PetAppointmentAdvisor` (o crea una clase nueva) con esta forma:
+
+```
+PetAppointmentAdvisor
+├── cuando los datos no son válidos
+│   ├── rechaza un nombre vacío
+│   └── rechaza una edad negativa
+├── cuando hay síntomas de urgencia
+│   └── clasifica como EMERGENCY  (parametrizada: "sangra", "no respira", "convulsion")
+├── en un día laborable
+│   ├── una mascota de 11 años va a revisión
+│   └── una mascota de 12 años va el mismo día
+└── en fin de semana
+    └── todo lo que no es urgente va el mismo día
+```
+
+1. Usa una clase `@Nested` por rama y `@DisplayName` en castellano.
+2. Fija el día con `Clock.fixed(...)` en el `@BeforeEach` de cada clase anidada: un lunes
+   para «día laborable», un sábado para «fin de semana».
+3. En la prueba de datos no válidos, comprueba **también el mensaje** de la excepción
+   (diapositiva 103).
+4. Agrupa varias comprobaciones de `friendlySummary(...)` en un solo `assertAll`, y rompe una
+   a propósito: ¿cuántos fallos informa?
+5. Añade una prueba que **solo** se ejecute en Windows con `assumeTrue` o
+   `@EnabledOnOs(OS.WINDOWS)` y comprueba en el informe que aparece como *skipped* en
+   Linux.
+6. Etiqueta las pruebas de urgencia con `@Tag("critico")` y ejecútalas solas:
+
+   ```powershell
+   .\mvnw.cmd -pl apps/petclinic-api test "-Dgroups=critico"
+   ```
+
+**Resultado esperado.** El informe de Surefire (`apps/petclinic-api/target/reports/surefire.html`)
+se lee como la tabla de reglas del principio de este documento.
+
+**Pregunta.** ¿Por qué `assertAll` y no cinco `assertEquals` seguidos? *(Con aserciones
+seguidas, el primer fallo oculta los demás.)*
+
+Solución: [`soluciones/Ejercicio14PruebasAnidadasTests.java`](soluciones/Ejercicio14PruebasAnidadasTests.java)
+
+---
+
+## Ejercicio 15 · Probar la seguridad
+
+**Objetivo.** Comprobar con pruebas automáticas que las reglas del módulo 3 se cumplen.
+**Diapositiva:** 132. **Tiempo:** 35 min.
+
+Crea `src/test/java/.../web/security/ReglasDeAccesoTests.java` con `@SpringBootTest` y
+`@AutoConfigureMockMvc` (no hace falta construir el `MockMvc` a mano como en la diapositiva).
+Una prueba por fila:
+
+| Petición | Usuario | Esperado |
+|---|---|---|
+| `GET /owners/1` | anónimo | 302 a `/login` |
+| `GET /owners/1` | `vet` | 403 |
+| `GET /owners/1` | `owner1` real (`@WithUserDetails`) | 200 |
+| `GET /owners/2` | `owner1` real | 200, pero **sin** propietario en el modelo |
+| `POST /owners/new` **sin** CSRF | `admin` | 403 |
+| `POST /owners/new` con `with(csrf())` y datos válidos (incluidos `user.username` y `user.password`) | `admin` | 302 |
+| `GET /admin/cualquiera` | `owner` | 403 |
+| `GET /actuator/health` | anónimo | 200 |
+
+Usa las tres formas de indicar el usuario y explica cuándo conviene cada una:
+`@WithMockUser`, `@WithUserDetails` y `.with(user("x").authorities(...))`.
+
+Si has hecho el ejercicio 6 o el 13 del módulo 3, añade dos filas más para la API:
+
+| `GET /api/v1/visits` | sin token | 401 |
+| `GET /api/v1/visits` | `.with(jwt().authorities(...))` | 200 |
+
+**Resultado esperado.** Una batería que falla en cuanto alguien abre una ruta por error en
+`SecurityConfiguration`. Pruébalo: cambia `/owners/**` a `permitAll()` y ejecuta.
+
+**Preguntas.**
+- La fila de `owners/2` depende de `OwnerService`, no de `SecurityConfiguration`. ¿Por qué
+  `@WithMockUser(username = "owner1")` **no** sirve para esa prueba? *(La comprobación busca
+  el `Owner` asociado al usuario en la base de datos; con un usuario ficticio, la regla se
+  cumple o falla por motivos que no son los que se quieren probar.)*
+- Esa misma fila responde **200** con la página vacía. ¿Es correcto? ¿Qué debería devolver?
+  *(Lo razonable es 403, o 404 si no se quiere revelar que el propietario existe. Es una
+  mejora pendiente del proyecto: escribe primero la prueba que lo exige y después el
+  cambio.)*
+
+Solución: [`soluciones/Ejercicio15ReglasDeAccesoTests.java`](soluciones/Ejercicio15ReglasDeAccesoTests.java)
+
+---
+
+## Ejercicio 16 · REST Assured contra la API propia
+
+**Objetivo.** Probar la API de extremo a extremo, por HTTP real, con la aplicación arrancada
+en un puerto aleatorio.
+**Diapositivas:** 124–130. **Tiempo:** 40 min.
+
+`ExternalApiRestAssuredTests` prueba APIs de **terceros**. Ahora toca la propia.
+
+1. Crea `src/test/java/.../web/api/VisitApiRestAssuredTests.java` con
+   `@SpringBootTest(webEnvironment = RANDOM_PORT)`. Inyecta el puerto con `@LocalServerPort`
+   y asígnalo a `RestAssured.port` en un `@BeforeEach`. (La diapositiva 125 usa
+   `DEFINED_PORT` y la URL completa: si el 8080 está ocupado, la prueba falla.)
+2. Escribe estas pruebas:
+   1. `GET /api/v1/visits?size=2` devuelve 200, dos elementos y `page.totalElements` > 2;
+   2. `GET /api/v1/visits?sort=unknown` devuelve 400 con `Content-Type:
+      application/problem+json`;
+   3. `POST /api/v1/visits` con una visita válida devuelve 201 y una cabecera `Location`
+      que, al seguirla, devuelve la misma visita;
+   4. `POST` sin descripción devuelve 400 y el detalle menciona `description`;
+   5. el listado responde en menos de 2 segundos (`time(lessThan(2000L))`).
+3. Activa el registro de petición y respuesta **solo cuando falle** una prueba:
+   `RestAssured.enableLoggingOfRequestAndResponseIfValidationFails()`.
+4. Opcional: autentícate con el formulario de Spring Security y pide la ficha HTML de un
+   propietario:
+
+   ```java
+   given().auth().form("owner1", "0wn3r", FormAuthConfig.springSecurity().withAutoDetectionOfCsrf())
+   ```
+
+**Resultado esperado.** Cinco pruebas en verde. Rompe a propósito el `Location` en
+`RestfulVisitController` y comprueba que la prueba 3 lo detecta.
+
+**Pregunta.** La prueba 3 crea datos. ¿Se deshacen al terminar, como en `@DataJpaTest`?
+*(No: con `RANDOM_PORT` la petición va por otro hilo y otra transacción. Hay que diseñar las
+aserciones para que no dependan del orden, o limpiar a mano.)*
+
+Solución: [`soluciones/Ejercicio16VisitApiRestAssuredTests.java`](soluciones/Ejercicio16VisitApiRestAssuredTests.java)
+
+---
+
+## Ejercicio 17 · Postman y Newman
+
+**Objetivo.** Mantener una colección de pruebas de API que también se pueda ejecutar en la
+integración continua.
+**Diapositiva:** 131. **Tiempo:** 30 min. **Requisito:** Postman y, para Newman, Node.js.
+
+1. Importa en Postman la colección y el entorno del repositorio:
+   - [`postman/petclinic-api.postman_collection.json`](../../postman/petclinic-api.postman_collection.json)
+   - [`postman/local.postman_environment.json`](../../postman/local.postman_environment.json)
+2. Arranca la aplicación y ejecuta la colección completa con *Run collection*. Lee los
+   *scripts* de la pestaña *Tests* de cada petición.
+3. Fíjate en cómo «Crear visita» guarda el identificador en una variable que usa la petición
+   siguiente.
+4. Añade tú una petición: `GET /api/v1/visits?petName=Leo` con dos pruebas: que el estado sea
+   200 y que **todas** las visitas devueltas sean de Leo.
+5. Ejecuta la colección sin interfaz gráfica, como lo haría un servidor de integración
+   continua:
+
+   ```bash
+   npx newman run postman/petclinic-api.postman_collection.json \
+       -e postman/local.postman_environment.json
+   ```
+
+6. Opcional: si `auth-service` está arrancado, ejecuta también la carpeta «Autenticación»,
+   que pide un token y lo reutiliza.
+
+**Resultado esperado.** Newman termina con 0 fallos y devuelve código de salida 0. Con la
+aplicación parada, devuelve un código distinto de 0: eso es lo que hace fallar un *pipeline*.
+
+**Pregunta.** ¿Qué aporta esta colección que no aporten las pruebas de REST Assured, y al
+revés? *(La colección la pueden mantener personas que no programan en Java y documenta la
+API con ejemplos; REST Assured vive con el código y se ejecuta en cada `mvnw verify`.)*
+
+---
+
+## Ejercicio 18 · Dobles de servicios externos, y sus límites
+
+**Objetivo.** Probar un cliente HTTP sin el servicio real, y ver qué riesgo queda.
+**Diapositivas:** 122–123. **Tiempo:** 30 min.
+
+1. Escribe una prueba **unitaria** de `BillsGateway.conRestClient()` con
+   `MockRestServiceServer`:
+
+   ```java
+   RestClient.Builder builder = RestClient.builder();
+   MockRestServiceServer servidor = MockRestServiceServer.bindTo(builder).build();
+   BillsGateway gateway = new BillsGateway(propiedades, mock(BillClient.class), builder, new RestTemplateBuilder());
+   ```
+
+2. Programa el servidor simulado para que responda a `GET /api/v1/bills` con dos facturas
+   y comprueba lo que devuelve el método.
+3. Ahora simula un 500. ¿Qué devuelve `conRestClient()`? ¿Se activa el cortocircuito?
+4. Cambia en la respuesta simulada `concept` por `concepto`, como si el equipo de facturas
+   hubiera renombrado el campo. ¿Falla la prueba?
+
+**Resultado esperado.** En el paso 3 la prueba recibe la excepción: el `@CircuitBreaker`
+**no** actúa porque se ha creado el objeto con `new` y no hay *proxy* (módulo 1,
+ejercicio 9). En el paso 4 la prueba **sigue en verde** si no compruebas el campo, y el
+`concept` llega a `null`.
+
+> **Mensaje clave.** El doble responde lo que **tú** crees que responde el servicio
+> (diapositiva 122). Si el servicio cambia, tu doble no se entera (123). La respuesta a eso
+> son las pruebas de **contrato** dirigidas por el consumidor (Spring Cloud Contract, Pact),
+> o una prueba de integración contra el servicio real en un entorno compartido.
+
+Solución: [`soluciones/Ejercicio18BillsGatewayTests.java`](soluciones/Ejercicio18BillsGatewayTests.java)
