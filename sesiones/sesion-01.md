@@ -77,8 +77,14 @@ Mientras arranca, cuenta la historia: Spring nació como alternativa ligera a J2
 sus ideas acabaron en el estándar, y el ecosistema creció tanto (diap. 10–11) que hizo falta
 Spring Boot para configurarlo (diap. 12–13).
 
-Cuando termine de arrancar, enseña <http://localhost:8080>, <http://localhost:8080/swagger-ui.html> y
-<http://localhost:8080/actuator>.
+Cuando termine de arrancar, enseña <http://localhost:8080> y, sobre todo,
+<http://localhost:8080/swagger-ui.html>: **será la herramienta de todo el curso** para probar la
+API, en lugar de `curl`. Ejecuta una operación delante del grupo (**Swagger UI** → *Visits* →
+`GET /api/v1/visits` → **Execute**) y enseña las tres zonas de la respuesta: la orden `curl`
+equivalente, el código de estado con las cabeceras, y el cuerpo. Busca también la etiqueta
+*Actuator*: los puntos de diagnóstico se llaman desde ahí.
+
+Guía para el docente: [`docs/swagger-ui-en-clase.md`](../docs/swagger-ui-en-clase.md).
 
 🗣 **Mensaje clave.** «Esta aplicación tiene base de datos, seguridad, API REST documentada,
 monitorización y vistas web. Ahora vais a contar cuántas líneas de configuración de
@@ -92,7 +98,9 @@ infraestructura hay: casi ninguna.»
 Es el corazón de la sesión: que cada participante salga con **su** proyecto funcionando.
 
 1. ⌨ Haz los pasos 1 y 2 en pantalla (generar en <https://start.spring.io> y descomprimir).
-   Señala en la estructura generada lo mismo que la diapositiva 14.
+   Señala en la estructura generada lo mismo que la diapositiva 14. Recuerda el paso de
+   añadir `springdoc-openapi-starter-webmvc-ui` (Initializr no la ofrece): sin ella no hay
+   Swagger UI para probar lo que escriban.
 2. 🧑‍💻 Que lo hagan ellos hasta el paso 7. Pasea por el aula.
 3. A los 25 minutos, ⌨ enseña la solución de
    [`practicas/tareas`](../practicas/tareas/) y comenta los **tres defectos** del
@@ -191,8 +199,9 @@ El resto del ejercicio 9 (escribir un aspecto) queda de tarea.
 
 1. ⌨ Ejercicio 2, en pantalla y rápido: arrancar con `--debug`, buscar
    `DataSourceAutoConfiguration` en *Positive matches*, excluirla y ver el fallo.
-2. 🧑‍💻 Ejercicio 8, **pasos 1 y 2** (12 min): recorrer los puntos de Actuator y cambiar el
-   nivel de registro sin reiniciar (el `POST` a `/actuator/loggers` de la diapositiva 32).
+2. 🧑‍💻 Ejercicio 8, **pasos 1 y 2** (12 min): recorrer los puntos de Actuator desde la etiqueta
+   *Actuator* de Swagger UI y cambiar el nivel de registro sin reiniciar (el `POST` a
+   `/actuator/loggers/{name}` de la diapositiva 32, con el cuerpo `{"configuredLevel":"DEBUG"}`).
 3. Los pasos 3 a 5 (indicador de salud propio, grupos, `InfoContributor`) quedan de tarea.
 
 🗣 **Mensaje clave.** «Actuator es la lupa para todo el curso. Y también es una puerta: en el

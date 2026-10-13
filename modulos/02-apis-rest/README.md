@@ -5,6 +5,11 @@ Guion docente. Duración estimada: **dos sesiones de 120 minutos**.
 > **Edición de 40 horas (sesiones de 3 h).** Este módulo se imparte en las [sesiones 2, 3 y 4](../../sesiones/README.md), que
 > tienen su propio guion cronometrado. Este documento sigue siendo la referencia del contenido.
 
+> **Swagger UI en lugar de `curl`.** Las órdenes `curl` de este documento se conservan como
+> referencia; en clase, la misma petición se hace desde Swagger UI
+> (<http://localhost:8080/swagger-ui.html>). Equivalencias y excepciones:
+> [`docs/swagger-ui-en-clase.md`](../../docs/swagger-ui-en-clase.md).
+
 ## Objetivos
 
 - Diseñar URIs y respuestas conformes a los principios REST.

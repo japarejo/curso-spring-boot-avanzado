@@ -46,6 +46,8 @@
 ### 0:00 – 0:10 · Repaso
 
 ⌨ Corrige el ejercicio 1: `PetRestController` en `/api/v1/pets` y la ruta antigua con 301.
+Enséñalo en Swagger UI (las operaciones nuevas bajo `/api/v1/pets`) y, para ver el 301 en sí,
+en la consola: Swagger UI sigue la redirección sin enseñarla.
 
 ```bash
 curl -i localhost:8080/api/pets          # 301 + Location: /api/v1/pets
@@ -57,11 +59,9 @@ Pregunta: «¿qué cambios **no** exigen versión nueva?» (añadir campos opcio
 
 📊 Diapositivas 59, 62–63.
 
-⌨ Ejercicio 2, pasos 1–3, en pantalla:
-
-```bash
-curl -s localhost:8080/api/v1/pets/1 | jq
-```
+⌨ Ejercicio 2, pasos 1–3, en pantalla: **Swagger UI** → *Pets* → `GET /api/v1/pets/{id}` →
+`id` = `1` → **Execute**. Fíjate también en el esquema `Pet` de la parte de abajo de Swagger UI:
+es la entidad, con todo lo que publica.
 
 Quita el `@JsonIgnore` de `Pet.visits` y repite. Con el `@JsonIgnore` de `Owner.pets` también
 quitado, el bucle infinito de la diapositiva 59 aparece de verdad. **Deshaz el cambio.**
@@ -133,14 +133,10 @@ Security Top 10 (autorización rota a nivel de objeto).»
 APIs REST».
 
 1. ⌨ Abre `apiclients/BillsGateway`: los tres estilos uno al lado del otro.
-2. ⌨ Levanta el servicio de facturas y compara:
-
-   ```bash
-   ./mvnw -pl infra/bills-service spring-boot:run           # otra terminal
-   curl -s localhost:8080/api/v1/bills-demo/rest-template | jq
-   curl -s localhost:8080/api/v1/bills-demo/rest-client  | jq
-   curl -s localhost:8080/api/v1/bills-demo/feign        | jq
-   ```
+2. ⌨ Levanta el servicio de facturas (`./mvnw -pl infra/bills-service spring-boot:run`, en
+   otra terminal) y compara en **Swagger UI** → *Bills demo* los tres `GET`:
+   `/rest-template`, `/rest-client` y `/feign`. Abre también la Swagger UI del propio servicio
+   de facturas, <http://localhost:8040/>: es la API que estamos consumiendo.
 
 3. **Para** el servicio de facturas y repite: el cortocircuito devuelve `[]`.
 4. 🧑‍💻 Ejercicio 4, paso 3 (15 min): manejar el 404 con `onStatus`.

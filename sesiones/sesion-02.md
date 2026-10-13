@@ -20,7 +20,8 @@
 - [ ] Imprimir o proyectar la tabla de 10 propuestas del **ejercicio 8** (se hace sin ordenador).
 - [ ] Repasar [`docs/diapositivas-nuevas.md`](../docs/diapositivas-nuevas.md): las dos
       diapositivas sobre `ProblemDetail` que faltan en el `.pptx`.
-- [ ] Tener `jq` a mano (o Swagger UI como alternativa para quien no lo tenga).
+- [ ] Swagger UI abierto en el proyector durante toda la sesión: todas las demos se hacen ahí
+      (ver [`docs/swagger-ui-en-clase.md`](../docs/swagger-ui-en-clase.md)).
 
 ## Cronograma
 
@@ -61,10 +62,12 @@ interfaz uniforme. Detente en dos cosas que se usarán hoy:
   `ETag` en el ejercicio 10.
 
 ⌨ Una petición de verdad, con cabeceras, para que vean la diapositiva 42 en vivo:
+**Swagger UI** → *Visits* → `GET /api/v1/visits/{id}` → `id` = `1` → **Execute**. Señala en la
+respuesta la orden `curl` generada (método, URL, cabecera `Accept`), el código de estado, las
+*Response headers* (`Content-Type`, `Date`…) y el cuerpo.
 
-```bash
-curl -v localhost:8080/api/v1/visits/1
-```
+Si el grupo quiere ver la petición **completa** tal como viaja, con todas sus cabeceras, es el
+único momento de la sesión en que compensa la consola: `curl -v localhost:8080/api/v1/visits/1`.
 
 ### 0:30 – 0:50 · Diseñar antes de programar
 
@@ -133,15 +136,14 @@ paginar **en memoria** solo vale para el ejercicio: en el módulo 6 se hará en 
 📊 Diapositiva 55 y las dos diapositivas nuevas de
 [`docs/diapositivas-nuevas.md`](../docs/diapositivas-nuevas.md).
 
-⌨ Provoca los errores y mira el cuerpo:
+⌨ Provoca los errores en **Swagger UI** y mira el código y el cuerpo `application/problem+json`:
 
-```bash
-curl -i localhost:8080/api/pets/99999                                     # 404
-curl -i localhost:8080/api/pets/abc                                       # 400
-curl -i -X POST localhost:8080/api/v1/visits \
-     -H 'Content-Type: application/json' -d '{}'                          # 400 con detalle
-curl -i -X PATCH localhost:8080/api/pets/1                                # 405
-```
+| Operación | Qué poner | Esperado |
+|---|---|---|
+| *Pets* → `GET /api/pets/{id}` | `id` = `99999` | 404 |
+| *Pets* → `GET /api/pets/{id}` | `id` = `abc` (Swagger UI avisa de que no es un entero: es la validación del **cliente**; bórralo y pruébalo con `curl -i localhost:8080/api/pets/abc` para ver la del **servidor**) | 400 |
+| *Visits* → `POST /api/v1/visits` | cuerpo `{}` | 400 con detalle por campo |
+| *Visits* → `POST /api/v1/visits` | cuerpo `{ esto no es json` | 400 sin filtrar el mensaje de Jackson |
 
 Abre `web/api/GlobalExceptionHandler` y señala las decisiones:
 
@@ -201,5 +203,6 @@ documenta.
 | El `POST` devuelve 415 | Falta `-H 'Content-Type: application/json'`. |
 | `sort=+lastName` no ordena | El `+` llega como espacio: usar `%2B` o tolerarlo en el código. |
 | `MissingServletRequestParameterException` | `@RequestParam` es obligatorio por defecto: `required = false` o `defaultValue`. |
-| La *cookie* no llega | En `curl` se envía con `-b "nombre=valor"`, no con `-H Cookie:` mal escrito. |
+| La *cookie* no llega desde Swagger UI | El navegador no deja enviar *cookies* propias: esa parte del ejercicio 9 va con `curl -b "nombre=valor"`. |
+| Swagger UI no muestra la cabecera `X-Saludo` | Mirar *Response headers*; si el navegador la oculta, es que la petición fue a otro origen. |
 | `curl` en PowerShell da errores raros | Es `Invoke-WebRequest`: usar `curl.exe`. |

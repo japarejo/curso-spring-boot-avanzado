@@ -63,8 +63,19 @@ Convenciones:
 - 🧑‍💻 **Práctica**: lo hace el alumnado. Lleva el tiempo asignado.
 - 📊 **Diapositivas**: números del `.pptx` de IDEXA que acompañan el bloque.
 
-Los comandos están escritos para **bash** (Linux, macOS, Git Bash). En Windows con PowerShell,
-`./mvnw` es `.\mvnw` y `curl` es `curl.exe`; el resto de diferencias están en
+**La API se enseña con Swagger UI, no con `curl`.** Todas las aplicaciones del curso traen
+la documentación interactiva configurada para clase (formularios ya editables, duración de cada
+petición, *Authorize* persistente y los endpoints de Actuator incluidos). Las instrucciones se
+escriben así:
+
+> **Swagger UI** → *Visits* → `GET /api/v1/visits` → `size` = `2` → **Execute**.
+
+`curl` queda solo para lo que Swagger UI no puede hacer (*cookies*, CORS, peticiones
+simultáneas, servicios sin API documentada). La guía completa, con la tabla de excepciones:
+[`docs/swagger-ui-en-clase.md`](../docs/swagger-ui-en-clase.md).
+
+Los comandos de consola están escritos para **bash** (Linux, macOS, Git Bash). En Windows con
+PowerShell, `./mvnw` es `.\mvnw` y `curl` es `curl.exe`; el resto de diferencias están en
 [`modulos/00-comandos-windows.md`](../modulos/00-comandos-windows.md).
 
 ## Material transversal
@@ -74,6 +85,7 @@ Los comandos están escritos para **bash** (Linux, macOS, Git Bash). En Windows 
 | [`modulos/00-preparacion-entorno.md`](../modulos/00-preparacion-entorno.md) | Enviar al alumnado **una semana antes** de la sesión 1 |
 | [`docs/fe-de-erratas-transparencias.md`](../docs/fe-de-erratas-transparencias.md) | Lo que está desactualizado o es incorrecto en las transparencias, diapositiva a diapositiva |
 | [`docs/diapositivas-nuevas.md`](../docs/diapositivas-nuevas.md) | Contenido propuesto para diapositivas que faltan (por ejemplo, `ProblemDetail`) |
+| [`docs/swagger-ui-en-clase.md`](../docs/swagger-ui-en-clase.md) | Cómo probar la API con Swagger UI en lugar de `curl`, y cuándo no se puede |
 | [`modulos/reto-integrador.md`](../modulos/reto-integrador.md) | Práctica final que recorre los seis módulos; se presenta en la sesión 13 y se comenta en la 14 |
 | [`postman/`](../postman/) | Colección de Postman de la API (módulo 4) |
 | [`practicas/`](../practicas/) | Proyectos independientes (con su propio Maven embebido): `tareas` y `mapeos-jpa` |

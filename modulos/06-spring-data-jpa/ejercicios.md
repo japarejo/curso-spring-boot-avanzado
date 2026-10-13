@@ -118,12 +118,19 @@ con las cuatro formas de proyectar y el SQL que genera cada una.
 
 1. Lee `repository/VisitSpecification.java`: siete predicados y un combinador que tolera
    nulos.
-2. Prueba la búsqueda con distintas combinaciones:
+2. Prueba la búsqueda con distintas combinaciones en **Swagger UI** → *Visits* →
+   `GET /api/v1/visits`: primero `petName` = `Leo`; después `fromDate` = `2013-01-01` y
+   `toDate` = `2013-01-03`. Mira `page.totalElements` y, en la consola, el SQL que genera cada
+   combinación: solo aparecen los predicados de los filtros rellenos.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -s "localhost:8080/api/v1/visits?petName=Leo" | jq '.page.totalElements'
    curl -s "localhost:8080/api/v1/visits?fromDate=2013-01-01&toDate=2013-01-03" | jq '.page.totalElements'
    ```
+
+   </details>
 
 3. Añade un predicado nuevo: filtrar por ciudad del propietario, navegando
    `visit.pet.owner.city`.
@@ -166,11 +173,9 @@ actualizar todas las claves ajenas.)*
 
 1. Lee `model/AuditableEntity`, `configuration/JpaAuditingConfiguration` y
    `configuration/AuditorAwareImpl`.
-2. Autentícate y crea un pago:
-
-   ```bash
-   curl -s localhost:8080/payments/random/new | jq
-   ```
+2. Inicia sesión en <http://localhost:8080/login> y, en la misma pestaña, abre
+   <http://localhost:8080/payments/random/new>: crea un pago con el usuario de la sesión. (No
+   es parte de la API, por eso no está en Swagger UI.)
 
 3. Consulta la tabla `payment` y comprueba `created_by` y `created_date`.
 4. Modifica el pago y comprueba `last_modified_by`.
@@ -268,12 +273,18 @@ sin `@Entity` en la 158, `joinColumns` e `inverseJoinColumns` invertidos en la 1
 **Objetivo.** Configurar el `DataSource` y ver qué pasa cuando se agotan las conexiones.
 **Diapositivas:** 151–152, 165. **Tiempo:** 30 min.
 
-1. Mira qué ha configurado Spring Boot sin que nadie se lo pida:
+1. Mira qué ha configurado Spring Boot sin que nadie se lo pida, en **Swagger UI** →
+   *Actuator*: `GET /actuator/configprops` (busca `hikari` con Ctrl+F en la respuesta) y
+   `GET /actuator/metrics/{requiredMetricName}` con `hikaricp.connections.max`.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -s localhost:8080/actuator/configprops | jq '.. | objects | select(has("spring.datasource.hikari"))? // empty' | head
    curl -s localhost:8080/actuator/metrics/hikaricp.connections.max | jq '.measurements'
    ```
+
+   </details>
 
    ¿Qué implementación de *pool* se usa? ¿Cuántas conexiones como máximo?
 
@@ -291,7 +302,12 @@ sin `@Entity` en la 158, `joinColumns` e `inverseJoinColumns` invertidos en la 1
 
 4. Añade el endpoint de demostración de la solución (`/api/v1/demo/pool/ocupar?ms=3000`), que
    abre una transacción y la mantiene viva.
-5. Lanza cinco peticiones a la vez:
+5. Lanza cinco peticiones **a la vez**. Este es uno de los pocos casos en que hace falta la
+   consola: Swagger UI lanza las peticiones de una en una. (Alternativa sin consola: abrir el
+   endpoint en cinco pestañas del navegador muy deprisa; funciona, pero es menos fiable.)
+   Mientras tanto, deja abierta en Swagger UI *Actuator* →
+   `GET /actuator/metrics/{requiredMetricName}` con `hikaricp.connections.pending` y ejecútala
+   un par de veces.
 
    ```bash
    seq 1 5 | xargs -P 5 -I{} curl -s -o /dev/null -w "%{http_code}\n" \

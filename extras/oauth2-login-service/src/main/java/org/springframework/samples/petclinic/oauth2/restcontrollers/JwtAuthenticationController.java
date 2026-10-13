@@ -1,6 +1,7 @@
 package org.springframework.samples.petclinic.oauth2.restcontrollers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -85,6 +86,7 @@ public class JwtAuthenticationController {
 	})
 	@RequestMapping(value = "/validate", method = RequestMethod.POST)
 	public ResponseEntity<JwtValidationResponse> validateToken(
+			@Parameter(hidden = true) // Swagger UI lo envia con el esquema bearer global (Authorize)
 			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
 			@RequestBody(required = false) JwtTokenRequest tokenRequest) {
 		String token = resolveToken(authorizationHeader, tokenRequest);
@@ -99,6 +101,7 @@ public class JwtAuthenticationController {
 	})
 	@RequestMapping(value = "/refresh", method = RequestMethod.POST)
 	public ResponseEntity<JwtResponse> refreshToken(
+			@Parameter(hidden = true) // Swagger UI lo envia con el esquema bearer global (Authorize)
 			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
 			@RequestBody(required = false) JwtTokenRequest tokenRequest) {
 		String token = resolveToken(authorizationHeader, tokenRequest);

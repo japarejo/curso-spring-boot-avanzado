@@ -3,6 +3,13 @@
 Se trabaja sobre `apps/petclinic-api` e `infra/auth-service`.
 Soluciones en [`soluciones/`](soluciones/).
 
+Todo se prueba con **Swagger UI**: la de `petclinic-api` (<http://localhost:8080/swagger-ui.html>)
+y la de `auth-service` (<http://localhost:8060/>). Para autenticarse se usa el botón
+**Authorize** (`bearer-jwt` para un token, `basic` para usuario y contraseña) o, en
+`petclinic-api`, iniciar sesión en <http://localhost:8080/login> en la misma pestaña: Swagger UI
+envía la *cookie* de sesión. Para probar «sin usuario», una **ventana privada**. Guía:
+[`docs/swagger-ui-en-clase.md`](../../docs/swagger-ui-en-clase.md).
+
 ---
 
 ## Ejercicio 1 · Ocultar no es proteger
@@ -28,12 +35,18 @@ del OWASP API Security Top 10.
 
 **Objetivo.** Encontrar un agujero real en el proyecto y taparlo.
 
-1. Sin iniciar sesión, prueba:
+1. En una **ventana privada** (sin sesión), abre Swagger UI y prueba *Pets* →
+   `GET /api/pets` y después `DELETE /api/pets/{id}` con `id` = `1`. ¿Qué código devuelve el
+   borrado?
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -s localhost:8080/api/pets | jq
    curl -i -X DELETE localhost:8080/api/pets/1
    ```
+
+   </details>
 
 2. Localiza en `SecurityConfiguration` la línea que lo permite.
 3. Cambia la regla para que las lecturas sigan siendo públicas pero las escrituras exijan
@@ -46,8 +59,11 @@ del OWASP API Security Top 10.
 
 4. Vuelve a probar. Ejecuta la batería de pruebas y comprueba qué se rompe.
 
-**Resultado esperado.** El DELETE pasa a 401. Alguna prueba de integración falla porque no
-se autentica: arréglala añadiendo `@WithMockUser`.
+**Resultado esperado.** En la ventana privada, el `DELETE` pasa a **401** (y no a una
+redirección al login: `SecurityConfiguration` responde 401 a la API y redirige solo la web).
+En la ventana normal, tras entrar en <http://localhost:8080/login> como `admin1`, el mismo
+`DELETE` desde Swagger UI funciona: va con la *cookie* de sesión. Alguna prueba de integración
+falla porque no se autentica: arréglala añadiendo `@WithMockUser`.
 
 **Pregunta.** ¿Por qué el `DELETE` funcionaba sin token CSRF? *(Porque `/api/**` tiene CSRF
 desactivado, y eso es correcto en una API sin estado.)*
@@ -92,12 +108,22 @@ funciona con un proxy de Spring, y ahí no hay proxy.
 
    ```bash
    ./mvnw -pl infra/auth-service spring-boot:run
+   ```
 
+   En la **Swagger UI de auth-service** (<http://localhost:8060/>) → *Autenticacion* →
+   `POST /api/v1/auth/login` → cuerpo `{"username": "vet1", "password": "v3t"}` →
+   **Execute**. Copia el valor de `token`.
+
+   <details><summary>Con <code>curl</code></summary>
+
+   ```bash
    TOKEN=$(curl -s -X POST localhost:8060/api/v1/auth/login \
      -H 'Content-Type: application/json' \
      -d '{"username":"vet1","password":"v3t"}' | jq -r .token)
    echo $TOKEN
    ```
+
+   </details>
 
 2. Pega el token en <https://jwt.io>. Identifica las tres partes.
 3. Decodifica el cuerpo tú mismo:
@@ -106,12 +132,18 @@ funciona con un proxy de Spring, y ahí no hay proxy.
    echo $TOKEN | cut -d. -f2 | base64 -d 2>/dev/null
    ```
 
-4. Cambia un carácter del token y valídalo:
+4. Valídalo: **Authorize** → `bearer-jwt` → pega el token (sin `Bearer`) → `POST
+   /api/v1/auth/validate` → **Execute**. Después pulsa **Logout** en *Authorize*, pega el token
+   con **un carácter cambiado** al final y repite.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -s -X POST localhost:8060/api/v1/auth/validate \
      -H "Authorization: Bearer ${TOKEN}X" | jq
    ```
+
+   </details>
 
 **Resultado esperado.** El paso 3 muestra el contenido **sin ninguna clave**. El paso 4
 devuelve `"valid": false`.
@@ -151,12 +183,17 @@ de ellos podría emitir tokens. Con RSA basta con repartir la clave pública.
    compartido para HS512, o clave pública para RSA).
 3. Añade una segunda `SecurityFilterChain` con `securityMatcher("/api/**")`, sin estado y
    con `oauth2ResourceServer`.
-4. Prueba:
+4. Prueba en la Swagger UI de `petclinic-api`, *Visits* → `GET /api/v1/visits`: primero sin
+   autorizar (401) y después con **Authorize** → `bearer-jwt` → el token de `auth-service` (200).
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -i localhost:8080/api/v1/visits                              # 401
    curl -i -H "Authorization: Bearer $TOKEN" localhost:8080/api/v1/visits   # 200
    ```
+
+   </details>
 
 **Resultado esperado.** La API deja de estar abierta y acepta el token emitido por el otro
 servicio.
@@ -211,7 +248,17 @@ esquema canónico de usuarios (81), el `SecurityContextHolder` (76), el formular
    Using generated security password: 8c1f...
    ```
 
-3. Prueba, y anota el código de cada respuesta:
+3. Abre <http://localhost:8080/swagger-ui.html>. ¿Qué pasa? ¿De dónde sale esa página de
+   login? Entra con `user` y la contraseña generada.
+4. Ya dentro, en Swagger UI, anota el código de cada respuesta:
+   - *tarea-controller* → `GET /api/v1/tareas`;
+   - *tarea-controller* → `POST /api/v1/tareas` con `{"descripcion": "x"}`;
+   - *Actuator* → `GET /actuator/health`.
+
+   Repite `GET /actuator/health` desde una **ventana privada** (sin sesión), escribiendo la URL
+   directamente. Prueba también `/logout` y `/h2-console`.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -i localhost:8080/api/v1/tareas                         # ?
@@ -221,8 +268,7 @@ esquema canónico de usuarios (81), el `SecurityContextHolder` (76), el formular
    curl -i localhost:8080/actuator/health                       # ?
    ```
 
-4. Abre <http://localhost:8080/api/v1/tareas> en el navegador. ¿De dónde sale la página de
-   login? Prueba también `/logout` y `/h2-console`.
+   </details>
 5. Ver la cadena de filtros que se ha montado:
 
    ```properties
@@ -238,9 +284,10 @@ esquema canónico de usuarios (81), el `SecurityContextHolder` (76), el formular
    spring.security.user.roles=USER
    ```
 
-**Resultado esperado.** Todo exige autenticación, incluido Actuator; Basic y formulario
-funcionan a la vez; el `POST` con Basic **da 403** aunque el usuario sea correcto (CSRF
-está activo por defecto); la consola H2 se ve en blanco (cabecera `X-Frame-Options: DENY`).
+**Resultado esperado.** Todo exige autenticación, incluidos Swagger UI y Actuator; Basic y
+formulario funcionan a la vez; el `GET` funciona pero el `POST` **da 403** aunque el usuario sea
+correcto (CSRF está activo por defecto, y Swagger UI no envía el token CSRF); la consola H2 se
+ve en blanco (cabecera `X-Frame-Options: DENY`).
 
 > **Mensaje clave.** La seguridad por defecto es **restrictiva**: deniega primero y te deja
 > abrir lo que necesites. Ese es el principio «denegación por defecto» de las transparencias,
@@ -309,7 +356,12 @@ obtiene una copia de la base de datos? ¿Y con BCrypt de coste 10?
    - `GET /api/v1/tareas/**`: `USER`;
    - `POST`, `PUT`, `DELETE` sobre `/api/v1/tareas/**`: `ADMIN`;
    - `/actuator/health`: público;
+   - Swagger UI (`/swagger-ui.html`, `/swagger-ui/**`, `/v3/api-docs/**`): público, para poder
+     probar lo demás;
    - todo lo demás: denegado.
+
+   Y para que el botón **Authorize** de Swagger UI ofrezca usuario y contraseña, declara el
+   esquema `basic` (con `@SecurityScheme` y `@OpenAPIDefinition(security = ...)`, ver la solución).
 5. Mira las tablas en la consola H2 (`users`, `authorities`) y comprueba que las
    contraseñas están cifradas.
 6. Compara con `petclinic-api`. Allí las tablas se llaman igual, pero las crea Hibernate a
@@ -317,7 +369,8 @@ obtiene una copia de la base de datos? ¿Y con BCrypt de coste 10?
    que declarar a mano las consultas `setUsersByUsernameQuery(...)`? ¿Qué diferencia hay en
    cómo se guarda el rol (`ROLE_ADMIN` frente a `admin`)?
 
-**Resultado esperado.** `ana` puede leer pero recibe 403 al crear; `jefe` puede todo.
+**Resultado esperado.** En Swagger UI, con **Authorize** → `basic` → `ana`/`ana`, el `GET`
+devuelve 200 y el `POST` 403. Con **Logout** y `jefe`/`jefe`, el `POST` devuelve 201.
 
 **Pregunta.** `hasRole("ADMIN")` frente a `hasAuthority("admin")`: ¿qué añade `hasRole`?
 *(El prefijo `ROLE_`. `createUser(...roles("ADMIN"))` guarda `ROLE_ADMIN`.)*
@@ -423,13 +476,20 @@ compararlo con el servidor de recursos del ejercicio 6.
 3. Crea una `SecurityFilterChain` para `/api/**` con `securityMatcher`, sin estado,
    sin CSRF, con el filtro **antes** de `UsernamePasswordAuthenticationFilter` y con un
    `AuthenticationEntryPoint` que responda 401 en JSON.
-4. Prueba:
+4. Prueba en la Swagger UI de `petclinic-api`, *Visits* → `GET /api/v1/visits`: sin
+   autorizar (401), con **Authorize** → `bearer-jwt` → el token (200), y con el token con un
+   carácter cambiado (401). Mira la consola con `DEBUG` en el paquete de tu filtro para ver por
+   qué se rechaza.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -i localhost:8080/api/v1/visits                                   # 401
    curl -i -H "Authorization: Bearer $TOKEN" localhost:8080/api/v1/visits  # 200
    curl -i -H "Authorization: Bearer ${TOKEN}x" localhost:8080/api/v1/visits # 401
    ```
+
+   </details>
 
 5. Compara tu filtro con la solución del ejercicio 6. Cuenta líneas y enumera qué
    comprobaciones hace cada uno (firma, caducidad, emisor, `nbf`, algoritmo).

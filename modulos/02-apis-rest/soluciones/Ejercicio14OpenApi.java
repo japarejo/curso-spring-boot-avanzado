@@ -29,6 +29,9 @@ import io.swagger.v3.oas.models.servers.Server;
  * La diapositiva 69 usa @OpenAPIDefinition; aqui se usa el bean para poder tomar
  * la version de la configuracion, y la anotacion solo para el esquema de seguridad.
  */
+// El proyecto YA declara los esquemas "basic" y "bearer-jwt" en el bean OpenAPI
+// (programatico). Aqui se ensena la forma DECLARATIVA del mismo esquema; si se
+// copia esta clase, quitar los addSecuritySchemes del bean para no declararlo dos veces.
 @Configuration
 @SecurityScheme(name = "bearer-jwt", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT",
 		description = "Token emitido por auth-service: POST http://localhost:8060/api/v1/auth/login")
@@ -84,8 +87,6 @@ public class OpenApi30Config {
 // ---------- application.properties ----------
 //   springdoc.api-docs.path=/api-docs
 //   springdoc.swagger-ui.path=/docs
-//   springdoc.swagger-ui.operations-sorter=method
-//   springdoc.swagger-ui.tags-sorter=alpha
 //
 // ---------- SecurityConfiguration ----------
 //   .requestMatchers("/docs", "/docs/**", "/swagger-ui/**", "/api-docs", "/api-docs/**").permitAll()

@@ -121,13 +121,13 @@ prototipos. Para una API pública con contrato estable, controlador a mano.»
 🧑‍💻 **Ejercicio 14** (35 min): metadatos, esquema de seguridad *bearer* JWT, errores con
 `ProblemDetail`, grupos `v1` y `legado`, `@Hidden`, rutas por propiedades.
 
-En los últimos 5 minutos, ⌨ pide un token a `auth-service` y úsalo en el botón *Authorize*:
+En los últimos 5 minutos, ⌨ pide un token a `auth-service` y úsalo en el botón *Authorize*, todo
+desde el navegador:
 
-```bash
-./mvnw -pl infra/auth-service spring-boot:run       # otra terminal
-curl -s -X POST localhost:8060/api/v1/auth/login -H 'Content-Type: application/json' \
-     -d '{"username":"admin1","password":"4dm1n"}' | jq -r .token
-```
+1. Arranca `auth-service` (`./mvnw -pl infra/auth-service spring-boot:run`, otra terminal).
+2. **Swagger UI de auth-service** (<http://localhost:8060/>) → `POST /api/v1/auth/login` →
+   cuerpo `{"username":"admin1","password":"4dm1n"}` → **Execute** → copia el `token`.
+3. **Swagger UI de petclinic-api** → **Authorize** → `bearer-jwt` → pega el token.
 
 (La API todavía no **exige** el token: eso es la sesión 6. Pero la documentación ya lo
 anuncia.)

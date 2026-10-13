@@ -67,10 +67,13 @@ Dibuja: un servidor de configuración, un repositorio (carpeta o Git) y N client
 
 ```bash
 ./mvnw -pl infra/config-server spring-boot:run
-curl -s localhost:8889/bills-service/development | jq
-./mvnw -pl infra/bills-service spring-boot:run
-curl -s localhost:8040/api/v1/bills/whoami/ana
+./mvnw -pl infra/bills-service spring-boot:run      # otra terminal
 ```
+
+- La configuración servida, en el **navegador**: <http://localhost:8889/bills-service/development>
+  (el servidor de configuración no tiene Swagger UI; es un `GET` y el JSON se ve formateado).
+- El valor que ve el servicio: **Swagger UI de bills-service** (<http://localhost:8040/>) →
+  `GET /api/v1/bills/whoami/{username}` → `username` = `ana` → **Execute**.
 
 Que lo repitan y cambien el perfil de `bills-service` a `classroom`
 (`--spring.profiles.active=classroom`). La misma aplicación responde distinto.

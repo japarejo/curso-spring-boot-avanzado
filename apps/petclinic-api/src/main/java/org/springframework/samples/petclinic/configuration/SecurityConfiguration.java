@@ -5,6 +5,7 @@ import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,6 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import jakarta.servlet.DispatcherType;
 
@@ -32,6 +36,10 @@ import jakarta.servlet.DispatcherType;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfiguration {
+
+	private static final AuthenticationEntryPoint API_ENTRY_POINT = new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED);
+
+	private static final AuthenticationEntryPoint WEB_ENTRY_POINT = new LoginUrlAuthenticationEntryPoint("/login");
 
 	// 1. AUTORIZACION, LOGIN, CSRF Y CABECERAS ---------------------------------
 	@Bean
@@ -80,6 +88,21 @@ public class SecurityConfiguration {
 			// consola H2, actuator y la API sin estado.
 			.csrf(csrf -> csrf
 				.ignoringRequestMatchers("/h2-console/**", "/actuator/**", "/api/**"))
+
+			// Que hacer con una peticion SIN autenticar que la necesita:
+			//   - la web redirige al formulario de login (lo de siempre);
+			//   - la API responde 401. Sin esto, en cuanto /api/** exige autenticacion
+			//     (modulo 3, ejercicio 2), una peticion anonima a la API recibe un 302
+			//     hacia /login, y Swagger UI o fetch() lo siguen solos y muestran el
+			//     HTML del login como si fuera la respuesta.
+			.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+				if (request.getRequestURI().startsWith(request.getContextPath() + "/api/")) {
+					API_ENTRY_POINT.commence(request, response, authException);
+				}
+				else {
+					WEB_ENTRY_POINT.commence(request, response, authException);
+				}
+			}))
 
 			// La consola de H2 se pinta dentro de un frame del mismo origen.
 			.headers(headers -> headers

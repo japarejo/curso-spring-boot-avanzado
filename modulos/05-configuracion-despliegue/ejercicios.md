@@ -49,7 +49,8 @@ y estas al fichero empaquetado.
    ./mvnw -pl apps/petclinic-api spring-boot:run -Dspring-boot.run.profiles=demo
    ```
 
-3. Comprueba: `curl -s localhost:8888/actuator/info | jq`
+3. Comprueba en **Swagger UI**, ahora en el puerto del perfil:
+   <http://localhost:8888/swagger-ui.html> → *Actuator* → `GET /actuator/info` → **Execute**.
 4. Ahora **acumula** dos perfiles: `-Dspring-boot.run.profiles=demo,mysql`. ¿Qué gana si los
    dos definen la misma propiedad?
 
@@ -85,20 +86,27 @@ Solución: [`soluciones/Ejercicio03PetclinicProperties.java`](soluciones/Ejercic
 
 **Objetivo.** Usar Actuator para algo útil.
 
+1. Abre <http://localhost:8080/logging> en el navegador. En la consola solo se ven INFO, WARN
+   y ERROR.
+2. **Swagger UI** → *Actuator* → `GET /actuator/loggers/{name}` → `name` =
+   `org.springframework.samples.petclinic` → **Execute**. Mira `configuredLevel` y
+   `effectiveLevel`.
+3. *Actuator* → `POST /actuator/loggers/{name}` con el mismo `name` y el cuerpo
+   `{"configuredLevel": "TRACE"}` → **Execute**.
+4. Recarga <http://localhost:8080/logging>: ahora aparecen los cinco niveles.
+5. Para volver al valor original, repite el paso 3 con `{"configuredLevel": null}`.
+
+<details><summary>Con <code>curl</code></summary>
+
 ```bash
 curl -s localhost:8080/logging
-# En la consola solo se ven INFO, WARN y ERROR
-
 curl -s localhost:8080/actuator/loggers/org.springframework.samples.petclinic | jq
-
 curl -X POST localhost:8080/actuator/loggers/org.springframework.samples.petclinic \
   -H 'Content-Type: application/json' -d '{"configuredLevel":"TRACE"}'
-
 curl -s localhost:8080/logging
-# Ahora aparecen los cinco niveles
 ```
 
-Para volver al valor original: `{"configuredLevel":null}`.
+</details>
 
 **Pregunta.** ¿Por qué esto es peligroso si `/actuator/**` está abierto en producción?
 
@@ -115,7 +123,8 @@ Para volver al valor original: `{"configuredLevel":null}`.
    management.endpoints.web.exposure.include=health,info,metrics,prometheus
    ```
 
-3. Comprueba: `curl -s localhost:8080/actuator/prometheus | head -30`
+3. Comprueba en **Swagger UI** → *Actuator* → `GET /actuator/prometheus` (o directamente en
+   el navegador, <http://localhost:8080/actuator/prometheus>: es texto plano).
 4. Añade un contador propio: cada vez que se crea una visita, incrementa
    `petclinic.visitas.creadas`.
 5. Genera unas cuantas visitas y localiza la métrica.
@@ -239,13 +248,20 @@ la seguridad, que es lo que hace la diapositiva 138.
    spring.boot.admin.client.instance.metadata.user.password=${MONITOR_PASSWORD}
    ```
 
-6. Comprueba:
+6. Comprueba en **Swagger UI** → *Actuator*: `GET /actuator/health` sin autorizar (200),
+   `GET /actuator/env` sin autorizar (401), y `GET /actuator/env` tras **Authorize** →
+   `basic` → `monitor` y su clave (200). El esquema `basic` ya está declarado en
+   `OpenApi30Config`.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -i localhost:8080/actuator/env                     # 401
    curl -i -u monitor:<clave> localhost:8080/actuator/env  # 200
    curl -i localhost:8080/actuator/health                  # 200
    ```
+
+   </details>
 
 **Resultado esperado.** Spring Boot Admin vuelve a mostrarlo todo, pero un anónimo ya no puede
 leer la configuración ni descargar la memoria del proceso.
@@ -274,7 +290,8 @@ configuración: no guardar secretos en claro y cambiar valores sin reiniciar.
    ENCRYPT_KEY=una-clave-larga-del-curso ./mvnw -pl infra/config-server spring-boot:run
    ```
 
-2. Cifra un valor con el propio servidor:
+2. Cifra un valor con el propio servidor. Aquí **sí** hace falta la consola (o Postman): el
+   servidor de configuración no tiene Swagger UI y `/encrypt` es un `POST`.
 
    ```bash
    curl -s localhost:8889/encrypt -d 'contraseña-de-la-bd'
@@ -286,11 +303,8 @@ configuración: no guardar secretos en claro y cambiar valores sin reiniciar.
    billing.demo.secreto={cipher}AQB3...
    ```
 
-4. Pide la configuración y comprueba que **sale descifrada**:
-
-   ```bash
-   curl -s localhost:8889/bills-service/default | jq '.propertySources[0].source'
-   ```
+4. Pide la configuración y comprueba que **sale descifrada**. Es un `GET`: basta el navegador,
+   <http://localhost:8889/bills-service/default>.
 
 5. Responde: ¿dónde vive ahora el secreto, y quién puede leerlo?
 
@@ -311,14 +325,22 @@ configuración: no guardar secretos en claro y cambiar valores sin reiniciar.
 
    ```bash
    ./mvnw -pl infra/bills-service spring-boot:run
-   curl -s localhost:8040/api/v1/bills/whoami/ana
    ```
+
+   **Swagger UI de bills-service** (<http://localhost:8040/>) → *Bills* →
+   `GET /api/v1/bills/whoami/{username}` → `username` = `ana` → **Execute**.
 3. Cambia `user.role` en `bills-service-development.properties`. Pide de nuevo: **no cambia**.
-4. Fuerza la recarga:
+4. Fuerza la recarga: en la misma Swagger UI → *Actuator* → `POST /actuator/refresh` →
+   **Execute**.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
+   curl -s localhost:8040/api/v1/bills/whoami/ana
    curl -X POST localhost:8040/actuator/refresh
    ```
+
+   </details>
 
 5. Pide de nuevo. Ahora sí. ¿Qué devuelve el `POST` del paso 4?
 
@@ -405,15 +427,18 @@ Solución: [`soluciones/Ejercicio11TomcatExterno.md`](soluciones/Ejercicio11Tomc
    ./mvnw package -DskipTests
    docker build --tag=tareas:latest .
    docker run --rm -p 8887:8080 tareas:latest
-   curl -s localhost:8887/api/v1/tareas | jq
    ```
+
+   La aplicación del contenedor tiene su Swagger UI en el puerto publicado:
+   <http://localhost:8887/swagger-ui.html>.
 
 4. Pasa configuración **sin reconstruir** la imagen:
 
    ```bash
    docker run --rm -p 8887:8080 -e SPRING_JPA_SHOW_SQL=false -e INFO_APP_DESCRIPTION="desde Docker" tareas:latest
-   curl -s localhost:8887/actuator/info | jq
    ```
+
+   y mira *Actuator* → `GET /actuator/info` en <http://localhost:8887/swagger-ui.html>.
 
 5. Ahora haz una versión **multietapa** que compile dentro del contenedor, para no necesitar
    JDK en la máquina que construye. Compárala con `docker/Dockerfile` del curso.

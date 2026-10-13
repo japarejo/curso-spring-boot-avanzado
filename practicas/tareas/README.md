@@ -29,6 +29,7 @@ resto del curso, así que si ya has compilado el repositorio no descarga nada).
 
 | Dirección | Qué es |
 |---|---|
+| <http://localhost:8080/swagger-ui.html> | **Swagger UI**: aquí se prueba todo (API y Actuator) |
 | <http://localhost:8080/api/v1/tareas> | Listado de tareas |
 | <http://localhost:8080/api/v1/tareas?soloPendientes=true> | Solo las pendientes, ordenadas por fecha |
 | <http://localhost:8080/h2-console> | Consola H2 (URL `jdbc:h2:mem:tareas`, usuario `sa`, sin contraseña) |

@@ -42,7 +42,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+
+// Las dos anotaciones de OpenAPI hacen que Swagger UI muestre el boton Authorize con
+// usuario y contrasena (esquema "basic") y lo aplique a todas las operaciones. Asi se
+// prueba con ana y con jefe sin salir del navegador.
 @Configuration
+@SecurityScheme(name = "basic", type = SecuritySchemeType.HTTP, scheme = "basic")
+@OpenAPIDefinition(security = @SecurityRequirement(name = "basic"))
 public class SeguridadConfig {
 
 	@Bean
@@ -50,6 +60,8 @@ public class SeguridadConfig {
 		return http
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/actuator/health").permitAll()
+				// Swagger UI y el documento OpenAPI: publicos, para poder probar el resto.
+				.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/v1/tareas/**").hasRole("USER")
 				.requestMatchers("/api/v1/tareas/**").hasRole("ADMIN")
 				.anyRequest().denyAll())
@@ -96,7 +108,11 @@ public class SeguridadConfig {
 
 }
 
-// Comprobacion:
+// Comprobacion en Swagger UI (http://localhost:8080/swagger-ui.html):
+//   Authorize -> basic -> ana / ana    GET /api/v1/tareas -> 200 ; DELETE -> 403
+//   Logout, Authorize -> jefe / jefe   DELETE /api/v1/tareas/{id} -> 204
+//
+// Con curl:
 //   curl -i -u ana:ana   localhost:8080/api/v1/tareas                         # 200
 //   curl -i -u ana:ana   -X DELETE localhost:8080/api/v1/tareas/1             # 403
 //   curl -i -u jefe:jefe -X DELETE localhost:8080/api/v1/tareas/1             # 204

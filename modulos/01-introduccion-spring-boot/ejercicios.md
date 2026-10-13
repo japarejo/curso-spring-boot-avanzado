@@ -7,6 +7,11 @@ cd curso-spring-boot-avanzado
 ./mvnw -pl apps/petclinic-api spring-boot:run
 ```
 
+La API se prueba con **Swagger UI**: <http://localhost:8080/swagger-ui.html>. Las
+instrucciones se escriben así: **Swagger UI** → *Etiqueta* → `MÉTODO /ruta` → parámetros →
+**Execute**. Debajo de cada caso hay un desplegable con el equivalente en `curl`, por si se
+prefiere la consola. Guía completa: [`docs/swagger-ui-en-clase.md`](../../docs/swagger-ui-en-clase.md).
+
 Las soluciones están en [`soluciones/`](soluciones/).
 
 ---
@@ -98,17 +103,21 @@ clase tiene un único constructor.)
 1. Crea una clase `EstadisticasService` en `service/` anotada con `@Service`, con un método
    `long numeroDeMascotas()` que use `PetRepository`.
 2. Inyéctala en un nuevo `@RestController` que exponga `GET /api/v1/estadisticas`.
-3. Comprueba:
+3. Reinicia y compruébalo en **Swagger UI**: aparece una etiqueta nueva,
+   *estadisticas-rest-controller* (el nombre lo deduce springdoc de la clase; con `@Tag` se
+   le pone uno propio) → `GET /api/v1/estadisticas` → **Execute**.
+
+4. Busca tu bean en el contexto: **Swagger UI** → *Actuator* → `GET /actuator/beans` →
+   **Execute**, y busca `estadisticasService` en la respuesta (Ctrl+F).
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl localhost:8080/api/v1/estadisticas
-   ```
-
-4. Lista todos los beans del contexto:
-
-   ```bash
    curl -s localhost:8080/actuator/beans | jq '.contexts.application.beans | keys | length'
    ```
+
+   </details>
 
 **Resultado esperado.** El endpoint responde y el bean aparece en `/actuator/beans`.
 
@@ -185,6 +194,17 @@ Spring crea por nosotros (26) y los mecanismos para elegir entre varios beans (2
 2. Descomprímelo **fuera** del repositorio del curso y compara su estructura con la de la
    diapositiva 14. Localiza `mvnw`, `pom.xml`, la clase `*Application` y la prueba generada.
 
+   Añade a mano al `pom.xml` la documentación interactiva, que Initializr no ofrece. Es lo
+   que se usará para probar la aplicación en lugar de `curl`:
+
+   ```xml
+   <dependency>
+     <groupId>org.springdoc</groupId>
+     <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+     <version>2.9.1</version>
+   </dependency>
+   ```
+
 3. Abre el `pom.xml`. Fija el `parent` en la versión del curso:
 
    ```xml
@@ -205,15 +225,22 @@ Spring crea por nosotros (26) y los mecanismos para elegir entre varios beans (2
    `@RequestBody`, buscar un id inexistente acaba en un 500 por el `.get()` sobre un
    `Optional` vacío, y crear devuelve 200 en lugar de 201.
 
-6. Arranca y prueba:
+6. Arranca (`./mvnw spring-boot:run`) y prueba en <http://localhost:8080/swagger-ui.html>:
+   - *tarea-controller* → `POST /api/v1/tareas` → cuerpo
+     `{"descripcion": "Mi primera tarea", "fechaLimite": "2026-12-31"}` → **Execute**. Mira el
+     código (201) y la cabecera `location` en *Response headers*.
+   - *tarea-controller* → `GET /api/v1/tareas` → **Execute**.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
-   ./mvnw spring-boot:run
    curl -i -X POST localhost:8080/api/v1/tareas \
         -H 'Content-Type: application/json' \
         -d '{"descripcion":"Mi primera tarea","fechaLimite":"2026-12-31"}'
    curl -s localhost:8080/api/v1/tareas | jq
    ```
+
+   </details>
 
 7. Ejecuta la prueba que generó Initializr (`./mvnw test`) y explica qué comprueba
    realmente `contextLoads()`.
@@ -282,26 +309,31 @@ Solución: [`soluciones/Ejercicio07PomConBomImportado.xml`](soluciones/Ejercicio
 
 Se trabaja sobre `apps/petclinic-api`.
 
-1. Recorre los puntos de diagnóstico y anota para qué sirve cada uno:
+1. Recorre los puntos de diagnóstico en **Swagger UI** → *Actuator* y anota para qué sirve
+   cada uno. Como mínimo: `GET /actuator/health`, `GET /actuator/metrics`,
+   `GET /actuator/metrics/{requiredMetricName}` con `http.server.requests`,
+   `GET /actuator/conditions` y `GET /actuator/mappings`.
+
+2. Cambia el nivel de registro **sin reiniciar** (diapositiva 32):
+   1. **Swagger UI** → *Actuator* → `POST /actuator/loggers/{name}` → `name` =
+      `org.hibernate.SQL` → cuerpo `{"configuredLevel": "DEBUG"}` → **Execute**.
+   2. **Swagger UI** → *Visits* → `GET /api/v1/visits` → **Execute**, y mira la consola: ahora
+      aparece el SQL.
+   3. Repite el paso 1 con `{"configuredLevel": null}` para volver al nivel original.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -s localhost:8080/actuator | jq '._links | keys'
-   curl -s localhost:8080/actuator/health | jq
-   curl -s localhost:8080/actuator/metrics | jq '.names | length'
    curl -s localhost:8080/actuator/metrics/http.server.requests | jq
-   curl -s localhost:8080/actuator/conditions | jq '.contexts.application.positiveMatches | keys | length'
-   curl -s localhost:8080/actuator/mappings | jq '[.. | .patterns? // empty] | flatten | length'
-   ```
-
-2. Cambia el nivel de registro **sin reiniciar** (diapositiva 32):
-
-   ```bash
    curl -X POST localhost:8080/actuator/loggers/org.hibernate.SQL \
         -H 'Content-Type: application/json' -d '{"configuredLevel":"DEBUG"}'
    curl -s localhost:8080/api/v1/visits > /dev/null     # mira la consola
    curl -X POST localhost:8080/actuator/loggers/org.hibernate.SQL \
         -H 'Content-Type: application/json' -d '{"configuredLevel":null}'
    ```
+
+   </details>
 
 3. Crea un `HealthIndicator` propio, `FacturasHealthIndicator`, que compruebe si responde el
    servicio de facturas (`petclinic.bills.base-url`). Arranca **sin** el servicio de facturas y
@@ -318,7 +350,12 @@ Se trabaja sobre `apps/petclinic-api`.
    management.endpoint.health.group.externos.show-details=always
    ```
 
-   Arranca de nuevo sin facturas y compara las cuatro respuestas:
+   Arranca de nuevo sin facturas y compara en **Swagger UI** → *Actuator* las cuatro
+   respuestas: `GET /actuator/health` (fíjate en el **código**, no solo en el cuerpo) y
+   `GET /actuator/health/**` con la ruta `liveness`, `readiness` y `externos` (Swagger UI pide
+   los segmentos que van detrás de `/health/`).
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -s -o /dev/null -w '%{http_code}\n' localhost:8080/actuator/health
@@ -326,6 +363,8 @@ Se trabaja sobre `apps/petclinic-api`.
    curl -s localhost:8080/actuator/health/readiness
    curl -s localhost:8080/actuator/health/externos | jq
    ```
+
+   </details>
 
 5. Añade un `InfoContributor` que publique el número de mascotas registradas, y la
    información de compilación con la meta `build-info` del `spring-boot-maven-plugin`.

@@ -82,14 +82,13 @@ usuario a las tres de la madrugada.»
 
 ### 1:15 – 1:25 · Registro en caliente
 
-⌨ Ejercicio 4 en pantalla (ya se vio en la sesión 1 con Actuator):
+⌨ Ejercicio 4 en pantalla (ya se vio en la sesión 1), todo desde el navegador:
 
-```bash
-curl -s localhost:8080/logging
-curl -X POST localhost:8080/actuator/loggers/org.springframework.samples.petclinic \
-  -H 'Content-Type: application/json' -d '{"configuredLevel":"TRACE"}'
-curl -s localhost:8080/logging
-```
+1. Abre <http://localhost:8080/logging> y mira la consola: solo INFO, WARN y ERROR.
+2. **Swagger UI** → *Actuator* → `POST /actuator/loggers/{name}` →
+   `name` = `org.springframework.samples.petclinic` → cuerpo `{"configuredLevel":"TRACE"}` →
+   **Execute**.
+3. Recarga <http://localhost:8080/logging>: aparecen los cinco niveles.
 
 Pregunta para el descanso: «¿qué pasaría si cualquiera pudiera hacer ese `POST` en producción?».
 

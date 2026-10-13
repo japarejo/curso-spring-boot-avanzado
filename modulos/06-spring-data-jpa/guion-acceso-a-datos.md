@@ -1,5 +1,12 @@
 # Guion didactico: acceso a datos con Spring Boot, JPA, Hibernate y transacciones
 
+> **Swagger UI en lugar de `curl`.** Las órdenes `curl` de este documento se conservan como
+> referencia; en clase, la misma petición se hace desde Swagger UI
+> (<http://localhost:8080/swagger-ui.html>). Equivalencias y excepciones:
+> [`docs/swagger-ui-en-clase.md`](../../docs/swagger-ui-en-clase.md).
+
+> `bills-service` y `auth-service` tienen su Swagger UI en la raíz (<http://localhost:8040/>, <http://localhost:8060/>); el servidor de configuración y Eureka no tienen API documentada: sus `GET` se abren directamente en el navegador.
+
 Duracion: 3 sesiones de 2 horas.
 
 Estructura recomendada de cada sesion:

@@ -45,7 +45,7 @@ Abrir después:
 | Dirección | Qué es |
 |---|---|
 | <http://localhost:8080> | Aplicación (vistas JSP mínimas) |
-| <http://localhost:8080/swagger-ui.html> | API REST documentada |
+| <http://localhost:8080/swagger-ui.html> | API REST documentada e **interactiva**: en el curso se prueba todo desde aquí, también Actuator ([guía](docs/swagger-ui-en-clase.md)) |
 | <http://localhost:8080/h2-console> | Consola de la base de datos en memoria |
 | <http://localhost:8080/actuator> | Puntos de diagnóstico |
 

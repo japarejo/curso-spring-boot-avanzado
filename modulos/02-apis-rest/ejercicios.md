@@ -2,6 +2,9 @@
 
 Se trabaja sobre `apps/petclinic-api`. Soluciones en [`soluciones/`](soluciones/).
 
+La API se prueba con **Swagger UI** (<http://localhost:8080/swagger-ui.html>); los pocos casos en
+que hace falta `curl` lo dicen y explican por qué. Guía: [`docs/swagger-ui-en-clase.md`](../../docs/swagger-ui-en-clase.md).
+
 ---
 
 ## Ejercicio 1 · Unificar el versionado
@@ -21,8 +24,10 @@ La API tiene hoy tres convenciones conviviendo:
 3. Deja la ruta antigua respondiendo con `301 Moved Permanently`, para no romper clientes.
 4. Comprueba que Swagger UI refleja el cambio.
 
-**Resultado esperado.** `curl -i localhost:8080/api/pets` devuelve 301 con `Location`
-apuntando a `/api/v1/pets`.
+**Resultado esperado.** Swagger UI muestra las operaciones bajo `/api/v1/pets`. La redirección
+se comprueba en la consola, porque Swagger UI (como cualquier `fetch` del navegador) sigue el
+301 sin enseñarlo: `curl -i localhost:8080/api/pets` devuelve 301 con `Location` apuntando a
+`/api/v1/pets`.
 
 **Pregunta.** ¿Qué cambios **no** exigen una versión nueva? *(Añadir campos opcionales o
 recursos nuevos, si los clientes ignoran lo que no conocen.)*
@@ -33,11 +38,17 @@ recursos nuevos, si los clientes ignoran lo que no conocen.)*
 
 **Objetivo.** Ver en la práctica por qué no se devuelven entidades.
 
-1. Pide una mascota y observa la respuesta:
+1. Pide una mascota y observa la respuesta: **Swagger UI** → *Pets* → `GET /api/pets/{id}` →
+   `id` = `1` → **Execute**. Mira también, al final de la página, el esquema `Pet` que publica
+   la documentación: es la entidad tal cual.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -s localhost:8080/api/pets/1 | jq
    ```
+
+   </details>
 
 2. Quita el `@JsonIgnore` de `Pet.visits` y repite. Observa qué pasa.
 3. Deshaz ese cambio.
@@ -87,8 +98,11 @@ separado. El criterio es si son la misma cosa vista de dos maneras o dos contrat
 
    ```bash
    ./mvnw -pl infra/bills-service spring-boot:run      # otra terminal
-   curl -s localhost:8080/api/v1/bills-demo/rest-client | jq
    ```
+
+   y en **Swagger UI** → *Bills demo* ejecuta los tres `GET` (`/rest-template`,
+   `/rest-client`, `/feign`). La API que se consume tiene su propia Swagger UI:
+   <http://localhost:8040/>.
 
 3. Añade a `conRestClient()` el manejo del caso 404 con `onStatus`.
 4. Para el servicio de facturas y comprueba que el cortocircuito devuelve lista vacía.
@@ -109,7 +123,10 @@ el aviso del cortocircuito. La aplicación no devuelve un 500.
    @GetMapping(path = "/{id}", headers = "X-API-Version=2")
    ```
 
-2. Prueba las dos variantes:
+2. Prueba las dos variantes. Aquí **hace falta `curl`**, y es parte de la lección: OpenAPI no
+   admite dos operaciones con la misma ruta y el mismo método, así que Swagger UI solo muestra
+   una de las dos versiones. El versionado por cabecera es difícil de documentar; es un
+   argumento más a favor del versionado en la ruta.
 
    ```bash
    curl -s localhost:8080/api/v1/pets/1
@@ -137,7 +154,9 @@ forma de hacerlo en 3.5.
 2. Añade un bean `CorsConfigurationSource` que permita el origen
    `http://localhost:3000` sobre `/api/**`, con los métodos GET, POST, PUT y DELETE.
 3. Actívalo en `SecurityConfiguration` con `.cors(Customizer.withDefaults())`.
-4. Comprueba la petición de verificación previa:
+4. Comprueba la petición de verificación previa. Con `curl`, porque esta petición la lanza el
+   **navegador** por su cuenta cuando una página de **otro origen** llama a la API; desde Swagger
+   UI (mismo origen) no se produce nunca:
 
    ```bash
    curl -i -X OPTIONS localhost:8080/api/v1/visits \
@@ -164,11 +183,18 @@ combinación que el navegador rechaza?
 2. Configura `spring.data.rest.base-path=/data-api` y
    `spring.data.rest.detection-strategy=ANNOTATED`.
 3. Anota `VetRepository` con `@RepositoryRestResource`.
-4. Explora lo que aparece solo:
+4. Explora lo que aparece solo. Spring Data REST no se documenta en Swagger UI (no son
+   controladores tuyos), pero tiene su propio explorador interactivo: añade la dependencia
+   `org.springframework.data:spring-data-rest-hal-explorer` y abre <http://localhost:8080/data-api>.
+   Navega por los enlaces `_links` y prueba `vets`.
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -s localhost:8080/data-api/vets | jq
    ```
+
+   </details>
 
 5. Define una proyección con `@Projection` y pruébala con `?projection=...`.
 
@@ -269,13 +295,21 @@ Requisitos de calidad:
 1. `sort` y `fields` solo admiten una **lista blanca** de propiedades. Cualquier otra da
    400, no 500 (mira cómo lo hace `RestfulVisitSearchController`).
 2. `limit` tiene un máximo de 50, aunque el cliente pida más.
-3. Pruébalo:
+3. Pruébalo en **Swagger UI** → *owner-query-controller* → `GET /api/v1/owners`. Swagger UI
+   ha deducido de las anotaciones qué va en la *query string*, qué en la cabecera y qué en la
+   *cookie*; míralo antes de rellenar nada.
+   - `sort` = `-lastName`, `fields` = `firstName` y `lastName` (dos elementos), `limit` = `3`.
+   - `limit` = `1` y `Accept-Language` = `en`: busca `x-saludo` en *Response headers*.
+   - `sort` = `password` → 400 con `ProblemDetail`.
+   - `sort` = `+lastName`: funciona, porque Swagger UI codifica el `+` como `%2B`. En la consola
+     no es así (ver la pregunta del final).
+
+   La *cookie* es lo único que **no** se puede probar desde Swagger UI: el navegador no deja que
+   una página fije la cabecera `Cookie`. Para eso, la consola:
 
    ```bash
-   curl -s "localhost:8080/api/v1/owners?sort=-lastName&fields=firstName,lastName&limit=3" | jq
-   curl -i -H "Accept-Language: en" "localhost:8080/api/v1/owners?limit=1"
    curl -s -b "ultimaCiudad=Madison" "localhost:8080/api/v1/owners" | jq length
-   curl -i "localhost:8080/api/v1/owners?sort=password"          # 400
+   curl -s "localhost:8080/api/v1/owners?sort=+lastName" | jq        # ¿qué pasa con el +?
    ```
 
 **Resultado esperado.** Cada petición devuelve solo lo pedido, ordenado como se pidió, y
@@ -304,7 +338,21 @@ para una `ETag`.
 3. Haz que `PUT /api/v1/pets/{id}` exija `If-Match`. Si la versión no coincide, responde
    **412 Precondition Failed**. Sin la cabecera, **428 Precondition Required**.
 4. Haz que `DELETE` devuelva la cabecera propia de la diapositiva 57.
-5. Prueba la secuencia completa:
+5. Documenta las dos cabeceras para poder probarlas en Swagger UI: el `If-Match` del `PUT` ya
+   aparece solo (es un `@RequestHeader`); el `If-None-Match` del `GET` no, porque lo lee
+   `WebRequest` por dentro. Decláralo con
+   `@Parameter(in = ParameterIn.HEADER, name = "If-None-Match", schema = @Schema(type = "string"))`.
+6. Prueba la secuencia completa en **Swagger UI** → *Pets*:
+   1. `GET /api/v1/pets/{id}` con `id` = `1` → 200 y `etag: "1"` en *Response headers*.
+   2. Lo mismo con `If-None-Match` = `"1"` (con las comillas) → 304, sin cuerpo.
+   3. `PUT /api/v1/pets/{id}` con `If-Match` = `"7"` y el cuerpo de abajo → 412.
+   4. Repite el `PUT` sin `If-Match` → 428, y con `"1"` → 204 y una `etag` nueva.
+
+   ```json
+   {"id": 1, "name": "Leo", "birthDate": "2010/09/07", "type": "cat", "owner": 1}
+   ```
+
+   <details><summary>Con <code>curl</code></summary>
 
    ```bash
    curl -i localhost:8080/api/v1/pets/1                              # 200 + ETag: "1"
@@ -313,6 +361,8 @@ para una `ETag`.
         -d '{"id":1,"name":"Leo","birthDate":"2010/09/07","type":"cat","owner":1}' \
         localhost:8080/api/v1/pets/1                                 # 412
    ```
+
+   </details>
 
 **Resultado esperado.** La segunda petición no transfiere cuerpo. El PUT con una versión
 antigua se rechaza **antes** de tocar la base de datos.
@@ -436,12 +486,21 @@ ocultación de operaciones y eventos.
    `@RestResource(exported = false)`. Comprueba que `DELETE` da 405.
 7. Añade un `@RepositoryEventHandler` que registre en el log cada alta (`@HandleAfterCreate`).
 
+Pruébalo todo con el **explorador HAL** (<http://localhost:8080/data-api>): navega a
+`veterinarios`, sigue el enlace `search`, rellena `apellido` = `or`, y prueba el botón de
+borrado sobre un veterinario (debe dar 405). El explorador es a Spring Data REST lo que
+Swagger UI a los controladores.
+
+<details><summary>Con <code>curl</code></summary>
+
 ```bash
 curl -s localhost:8080/data-api | jq
 curl -s localhost:8080/data-api/veterinarios | jq '._embedded.veterinarios[0]'
 curl -s "localhost:8080/data-api/veterinarios/search/findByLastNameStartingWithIgnoreCase?apellido=or" | jq
 curl -i -X DELETE localhost:8080/data-api/veterinarios/1          # 405
 ```
+
+</details>
 
 **Resultado esperado.** El listado usa la proyección resumida; el detalle, la entidad
 completa; el `DELETE` no está disponible.
@@ -462,29 +521,31 @@ rutas.
 1. Mira el estado actual: <http://localhost:8080/swagger-ui.html> y `/v3/api-docs`.
 2. Completa la definición global en `OpenApi30Config`: descripción, contacto, licencia y
    servidores (el equivalente programático de `@OpenAPIDefinition`, diapositiva 69).
-3. Declara un esquema de seguridad `bearer` JWT (`@SecurityScheme`) y exige
-   `@SecurityRequirement` en las operaciones de escritura (diapositiva 70). Comprueba que
-   aparece el botón **Authorize** y pega un token de `auth-service` (módulo 3).
+3. Los esquemas de seguridad `basic` y `bearer-jwt` ya están declarados en `OpenApi30Config`
+   (por eso existe el botón **Authorize** desde el primer día). Léelo y compáralo con la forma
+   declarativa (`@SecurityScheme`) de la diapositiva 70. Después exige
+   `@SecurityRequirement(name = "bearer-jwt")` en las operaciones de **escritura**: aparece un
+   candado solo en ellas. Pega un token de `auth-service` (módulo 3) en *Authorize*.
 4. Documenta los errores con su esquema real: `@ApiResponse(responseCode = "404", content =
    @Content(schema = @Schema(implementation = ProblemDetail.class)))`.
 5. Separa la documentación en dos grupos con `GroupedOpenApi`: `v1` (`/api/v1/**`) y
    `legado` (`/api/pets/**`, `/api/v2/**`).
 6. Oculta el endpoint de demostración del ejercicio 12 con `@Hidden`.
-7. Mueve las rutas por propiedades y ordena la interfaz:
+7. Lee las propiedades `springdoc.*` que ya trae `application.properties` (las que preparan
+   Swagger UI para clase: formularios editables, duración de la petición, Actuator incluido,
+   solo `/api/**` y `/actuator/**`). Después mueve las rutas:
 
    ```properties
    springdoc.api-docs.path=/api-docs
    springdoc.swagger-ui.path=/docs
-   springdoc.swagger-ui.operations-sorter=method
-   springdoc.swagger-ui.tags-sorter=alpha
    ```
 
    No olvides actualizar `SecurityConfiguration`: la regla de Swagger apunta a las rutas
    antiguas.
-8. Exporta el contrato y valídalo:
+8. Exporta el contrato y valídalo. Abre en el navegador <http://localhost:8080/api-docs.yaml/v1>
+   (un documento por grupo), guárdalo como `openapi-v1.yaml` y pasa el *linter*:
 
    ```bash
-   curl -s localhost:8080/api-docs.yaml/v1 > openapi-v1.yaml     # un documento por grupo
    npx @redocly/cli lint openapi-v1.yaml
    ```
 

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -53,8 +55,13 @@ public class BillDemoRestController {
 	}
 
 	@GetMapping("/feign")
-	@Operation(summary = "Consume el servicio de facturas con un cliente declarativo Feign")
+	@Operation(summary = "Consume el servicio de facturas con un cliente declarativo Feign",
+		description = "Reenvia la cabecera Authorization. En Swagger UI se rellena con el boton Authorize.",
+		security = @SecurityRequirement(name = "bearer-jwt"))
 	public List<Bill> conFeign(
+			// Oculto en la documentacion: Swagger UI ignora los parametros de cabecera
+			// llamados Authorization; se envia con el esquema bearer-jwt.
+			@Parameter(hidden = true)
 			@RequestHeader(name = "Authorization", required = false, defaultValue = "") String authorization) {
 		return billsGateway.conFeign(authorization);
 	}

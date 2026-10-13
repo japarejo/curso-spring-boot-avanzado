@@ -26,6 +26,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.server.ResponseStatusException;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 class PetRestControllerConEtag {
 
 	private PetService petService; // el que ya tiene PetRestController
@@ -36,7 +40,12 @@ class PetRestControllerConEtag {
 	}
 
 	// --- 1 y 2. GET con ETag, Cache-Control y 304 ------------------------------
+	// El @Parameter solo DOCUMENTA la cabecera, para que Swagger UI ofrezca un campo
+	// donde escribirla. El valor lo lee WebRequest.checkNotModified por dentro.
 	@GetMapping("/{id}")
+	@Parameter(in = ParameterIn.HEADER, name = "If-None-Match", required = false,
+			description = "ETag recibida en un GET anterior, con comillas: \"1\"",
+			schema = @Schema(type = "string"))
 	public ResponseEntity<Pet> findById(@PathVariable("id") int id, WebRequest request) {
 		Pet pet = petService.findPetById(id);
 		if (pet == null) {

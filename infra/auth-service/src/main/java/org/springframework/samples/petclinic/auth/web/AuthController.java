@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -84,10 +86,18 @@ public class AuthController {
 			validitySeconds);
 	}
 
+	/**
+	 * La cabecera Authorization se documenta como requisito de seguridad y no como
+	 * parametro: la especificacion OpenAPI obliga a Swagger UI a IGNORAR los
+	 * parametros de cabecera llamados Authorization. Asi, en Swagger UI se pega el
+	 * token una vez en "Authorize" y la operacion se puede probar sin curl.
+	 */
 	@PostMapping("/validate")
-	@Operation(summary = "Comprueba la firma y la caducidad de un token")
+	@Operation(summary = "Comprueba la firma y la caducidad de un token",
+		description = "Pega el token obtenido en /login en el boton Authorize (bearer-jwt) y ejecuta.",
+		security = @SecurityRequirement(name = "bearer-jwt"))
 	public ValidationResponse validate(
-			@RequestHeader(value = "Authorization", required = false) String authorization) {
+			@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization) {
 		String token = extraerToken(authorization);
 		if (token == null || !tokenService.isTokenValid(token)) {
 			return new ValidationResponse(false, null, java.util.List.of());
