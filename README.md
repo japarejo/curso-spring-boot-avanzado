@@ -87,6 +87,7 @@ llevárselo a casa.
 |---|---|---|
 | Criteria API y metamodelo estático | [`modulos/06-spring-data-jpa/laboratorio-criteria-api.md`](modulos/06-spring-data-jpa/laboratorio-criteria-api.md) | `repository/criteria/` |
 | Transacciones avanzadas | [`modulos/06-spring-data-jpa/laboratorio-transacciones-avanzadas.md`](modulos/06-spring-data-jpa/laboratorio-transacciones-avanzadas.md) | `service/transacciones/` |
+| Mapeo entidad-DTO con MapStruct | [`practicas/mapeo-dtos/README.md`](practicas/mapeo-dtos/README.md) | `practicas/mapeo-dtos` |
 | Permisos por instancia con ACL | [`modulos/03-seguridad/guion-acl.md`](modulos/03-seguridad/guion-acl.md) | `extras/acl-service` |
 | Inicio de sesión con proveedores externos | [`extras/README.md`](extras/README.md) | `extras/oauth2-login-service` |
 | Pruebas contra la base de datos real | [`modulos/04-pruebas/guion-testcontainers.md`](modulos/04-pruebas/guion-testcontainers.md) | pruebas `*IT` |
@@ -116,7 +117,8 @@ curso-spring-boot-avanzado/
 ├── sesiones/                Guiones cronometrados de la edición de 40 h (14 sesiones)
 ├── practicas/               Proyectos independientes, cada uno con su Maven embebido
 │   ├── tareas/              La aplicación "desde cero" del módulo 1 (se reutiliza en 3 y 6)
-│   └── mapeos-jpa/          Laboratorio de mapeos JPA del módulo 6
+│   ├── mapeos-jpa/          Laboratorio de mapeos JPA del módulo 6
+│   └── mapeo-dtos/          Mapeo entidad-DTO con MapStruct (ampliación del módulo 2)
 ├── postman/                 Colección y entorno de Postman/Newman (módulo 4)
 └── docs/                    Fe de erratas y diapositivas nuevas propuestas
 ```
