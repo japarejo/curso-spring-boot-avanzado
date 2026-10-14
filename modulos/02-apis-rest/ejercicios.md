@@ -556,3 +556,84 @@ su esquema `ProblemDetail`. El *linter* da menos avisos que con la configuració
 el contrato (*contract first*)? ¿Cuándo cada una?
 
 Solución: [`soluciones/Ejercicio14OpenApi.java`](soluciones/Ejercicio14OpenApi.java)
+
+---
+
+## Ejercicio 15 · Vistas por rol: `@JsonView` fijo y `MappingJacksonValue`
+
+**Objetivo.** Ver las dos formas de elegir una vista Jackson: fija en el método o decidida
+en cada petición.
+**Continúa:** ejercicio 3. **Tiempo:** 25 min.
+
+El proyecto ya trae un ejemplo completo y funcionando, sobre propietarios, para que no
+choque con el `PetResponse` del ejercicio 3:
+
+| Fichero | Qué contiene |
+|---|---|
+| `web/api/dto/VistasPropietario` | Tres vistas encadenadas: `Publica` ⊂ `Recepcion` ⊂ `Admin` |
+| `web/api/dto/OwnerResponse` | Un único DTO; cada campo lleva su `@JsonView` |
+| `web/api/OwnerViewsDemoRestController` | Los tres endpoints de abajo |
+
+| Vista | Campos |
+|---|---|
+| `Publica` | `id`, `firstName`, `lastName`, `city` |
+| `Recepcion` | lo anterior + `address`, `telephone` |
+| `Admin` | lo anterior + `version`, `username` |
+
+1. **Vista fija.** En **Swagger UI** → *Views demo*:
+   - `GET /api/v1/views-demo/owners` → cada propietario con cuatro campos (`Publica`).
+   - `GET /api/v1/views-demo/owners/{id}` con `id` = `1` → seis campos (`Recepcion`).
+
+   Lee el controlador: la vista va en `@JsonView` sobre el método. Se decide **al
+   compilar**; para otra vista hace falta otro método.
+2. **Vista dinámica.** `GET /api/v1/views-demo/owners/{id}/por-rol` con `id` = `1` y el
+   desplegable `rol` en `PUBLICO`, `RECEPCION` y `ADMIN`. Mismo método, tres respuestas.
+   Lee cómo se hace:
+
+   ```java
+   MappingJacksonValue respuesta = new MappingJacksonValue(OwnerResponse.from(owner));
+   respuesta.setSerializationView(rol.getVista());
+   return respuesta;
+   ```
+
+   `MappingJacksonValue` envuelve el objeto y le adjunta la vista; el conversor Jackson de
+   Spring la aplica al serializar.
+3. Pide `rol=admin` (en minúsculas) y `rol=jefe`. ¿Qué código devuelve y por qué? *(400: Spring
+   convierte el texto al enum `Rol` por su nombre exacto.)*
+4. Quita el `@JsonView` del campo `id` de `OwnerResponse` y repite el paso 1. ¿Dónde está el
+   `id`? *(Ha desaparecido de todas las vistas: Spring Boot desactiva
+   `DEFAULT_VIEW_INCLUSION`, así que con una vista activa un campo sin `@JsonView` no se
+   serializa nunca.)* Deshaz el cambio.
+5. **El problema de seguridad.** Haz que la vista salga del usuario autenticado y no de un
+   parámetro. Añade un endpoint `GET /api/v1/views-demo/owners/{id}/mia` que reciba
+   `Authentication` y elija `Admin` si tiene la autoridad `admin`, `Recepcion` si tiene `vet`
+   y `Publica` en otro caso (o si no hay usuario: `/api/**` sigue abierta y `Authentication`
+   llega a `null`). Para probarlo, entra en <http://localhost:8080/login> con `admin1`/`4dm1n`,
+   `vet1`/`v3t` u `owner1`/`0wn3r` y, en el mismo navegador, llama al endpoint desde Swagger UI:
+   la cookie de sesión viaja sola.
+
+   <details><summary>Con <code>curl</code></summary>
+
+   ```bash
+   curl -s localhost:8080/api/v1/views-demo/owners | jq '.[0]'
+   curl -s localhost:8080/api/v1/views-demo/owners/1 | jq
+   curl -s "localhost:8080/api/v1/views-demo/owners/1/por-rol?rol=ADMIN" | jq
+   curl -i "localhost:8080/api/v1/views-demo/owners/1/por-rol?rol=jefe"        # 400
+   ```
+
+   </details>
+
+**Resultado esperado.** El mismo objeto sale con cuatro, seis u ocho campos. En el paso 5,
+cada usuario ve su vista sin poder elegirla.
+
+**Pregunta.** En el paso 2, ¿qué impide que cualquiera pida `rol=ADMIN`? *(Nada. Una vista
+elegida por el cliente es una preferencia de presentación, no un control de acceso. Ocultar
+campos a quien no debe verlos exige sacar el rol de la autenticación, como en el paso 5.)*
+
+**Nota para 4.x.** Spring Framework 7 marca `MappingJacksonValue` como obsoleta: la vista se
+pasa como *hint* de serialización al conversor de Jackson 3. `@JsonView` en el método sigue
+funcionando igual.
+
+Pruebas: `OwnerViewsDemoRestControllerMockMvcTests`.
+
+Solución del paso 5: [`soluciones/Ejercicio15VistaPorUsuario.java`](soluciones/Ejercicio15VistaPorUsuario.java)

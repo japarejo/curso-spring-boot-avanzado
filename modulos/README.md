@@ -14,7 +14,7 @@ En Windows, los comandos traducidos a PowerShell y las siete trampas de la conso
 | # | Módulo | Sesiones (edición de 40 h) | Documentos |
 |---|---|---|---|
 | 1 | [Introducción a Spring Boot](01-introduccion-spring-boot/) | [1](../sesiones/sesion-01.md) | guion, 10 ejercicios |
-| 2 | [APIs REST avanzadas](02-apis-rest/) | [2](../sesiones/sesion-02.md), [3](../sesiones/sesion-03.md), [4](../sesiones/sesion-04.md) | guion, 14 ejercicios |
+| 2 | [APIs REST avanzadas](02-apis-rest/) | [2](../sesiones/sesion-02.md), [3](../sesiones/sesion-03.md), [4](../sesiones/sesion-04.md) | guion, 15 ejercicios |
 | 3 | [Seguridad](03-seguridad/) | [5](../sesiones/sesion-05.md), [6](../sesiones/sesion-06.md) | guion, 14 ejercicios, guion de ACL |
 | 4 | [Pruebas](04-pruebas/) | [7](../sesiones/sesion-07.md), [8](../sesiones/sesion-08.md) | guion de clases, 18 ejercicios, guion de Testcontainers |
 | 5 | [Configuración y despliegue](05-configuracion-despliegue/) | [9](../sesiones/sesion-09.md), [10](../sesiones/sesion-10.md) | guion de configurabilidad, 13 ejercicios |

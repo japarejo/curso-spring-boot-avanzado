@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -179,7 +178,7 @@ public class PetVisitSearchController {
     // ── DTOs ────────────────────────────────────────────────────────────────
 
     @Schema(description = "Resultado de la búsqueda de mascotas con demostración de LEFT JOIN.")
-    @Data @NoArgsConstructor @AllArgsConstructor
+    @Data @NoArgsConstructor
     public static class PetSearchResponse {
         @Schema(description = "Modo de join utilizado: 'left' o 'inner'.", example = "left")
         private String joinMode;
@@ -195,10 +194,19 @@ public class PetVisitSearchController {
 
         @Schema(description = "Lista de mascotas encontradas.")
         private List<PetSummary> pets;
+
+        public PetSearchResponse(String joinMode, String visitDescriptionFilter, String sqlApproximado,
+                int resultCount, List<PetSummary> pets) {
+            this.joinMode = joinMode;
+            this.visitDescriptionFilter = visitDescriptionFilter;
+            this.sqlApproximado = sqlApproximado;
+            this.resultCount = resultCount;
+            this.pets = pets;
+        }
     }
 
     @Schema(description = "Resumen de una mascota con sus visitas y si coincide con el filtro.")
-    @Data @NoArgsConstructor @AllArgsConstructor
+    @Data @NoArgsConstructor
     public static class PetSummary {
         @Schema(example = "7")
         private Integer petId;
@@ -212,10 +220,20 @@ public class PetVisitSearchController {
         private boolean hasMatchingVisit;
         @Schema(description = "Todas las visitas de la mascota (cargadas de forma EAGER).")
         private List<VisitSummary> visits;
+
+        public PetSummary(Integer petId, String petName, String petType, String ownerFullName,
+                boolean hasMatchingVisit, List<VisitSummary> visits) {
+            this.petId = petId;
+            this.petName = petName;
+            this.petType = petType;
+            this.ownerFullName = ownerFullName;
+            this.hasMatchingVisit = hasMatchingVisit;
+            this.visits = visits;
+        }
     }
 
     @Schema(description = "Resumen de una visita.")
-    @Data @NoArgsConstructor @AllArgsConstructor
+    @Data @NoArgsConstructor
     public static class VisitSummary {
         @Schema(example = "1")
         private Integer visitId;
@@ -223,5 +241,11 @@ public class PetVisitSearchController {
         private LocalDate date;
         @Schema(example = "annual rabies shot")
         private String description;
+
+        public VisitSummary(Integer visitId, LocalDate date, String description) {
+            this.visitId = visitId;
+            this.date = date;
+            this.description = description;
+        }
     }
 }

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -197,19 +196,26 @@ public class RestfulVisitSearchController {
 	@Schema(description = "Response wrapper for a paginated visit search.")
 	@Data
 	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class PagedVisitsResponse {
 		private List<VisitSummary> content;
 		private PageMetadata page;
 		private VisitFilters filters;
 		private String sort;
 		private PageLinks links;
+
+		public PagedVisitsResponse(List<VisitSummary> content, PageMetadata page, VisitFilters filters,
+				String sort, PageLinks links) {
+			this.content = content;
+			this.page = page;
+			this.filters = filters;
+			this.sort = sort;
+			this.links = links;
+		}
 	}
 
 	@Schema(description = "Filters applied to the search. Null means the filter was not used.")
 	@Data
 	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class VisitFilters {
 		private Integer petId;
 		private String ownerLastName;
@@ -218,12 +224,22 @@ public class RestfulVisitSearchController {
 		private String description;
 		private LocalDate fromDate;
 		private LocalDate toDate;
+
+		public VisitFilters(Integer petId, String ownerLastName, String petName, String petType,
+				String description, LocalDate fromDate, LocalDate toDate) {
+			this.petId = petId;
+			this.ownerLastName = ownerLastName;
+			this.petName = petName;
+			this.petType = petType;
+			this.description = description;
+			this.fromDate = fromDate;
+			this.toDate = toDate;
+		}
 	}
 
 	@Schema(description = "Page metadata that clients can use to render pagination controls.")
 	@Data
 	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class PageMetadata {
 		private int number;
 		private int size;
@@ -232,49 +248,85 @@ public class RestfulVisitSearchController {
 		private int totalPages;
 		private boolean first;
 		private boolean last;
+
+		public PageMetadata(int number, int size, int numberOfElements, long totalElements,
+				int totalPages, boolean first, boolean last) {
+			this.number = number;
+			this.size = size;
+			this.numberOfElements = numberOfElements;
+			this.totalElements = totalElements;
+			this.totalPages = totalPages;
+			this.first = first;
+			this.last = last;
+		}
 	}
 
 	@Schema(description = "Navigation links generated from the current request.")
 	@Data
 	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class PageLinks {
 		private URI self;
 		private URI first;
 		private URI previous;
 		private URI next;
 		private URI last;
+
+		public PageLinks(URI self, URI first, URI previous, URI next, URI last) {
+			this.self = self;
+			this.first = first;
+			this.previous = previous;
+			this.next = next;
+			this.last = last;
+		}
 	}
 
 	@Schema(description = "Visit row returned by the API without exposing the JPA entity graph.")
 	@Data
 	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class VisitSummary {
 		private Integer id;
 		private LocalDate date;
 		private String description;
 		private PetSummary pet;
 		private OwnerSummary owner;
+
+		public VisitSummary(Integer id, LocalDate date, String description, PetSummary pet, OwnerSummary owner) {
+			this.id = id;
+			this.date = date;
+			this.description = description;
+			this.pet = pet;
+			this.owner = owner;
+		}
 	}
 
 	@Data
 	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class PetSummary {
 		private Integer id;
 		private String name;
 		private String type;
+
+		public PetSummary(Integer id, String name, String type) {
+			this.id = id;
+			this.name = name;
+			this.type = type;
+		}
 	}
 
 	@Data
 	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class OwnerSummary {
 		private Integer id;
 		private String firstName;
 		private String lastName;
 		private String fullName;
+
+		public OwnerSummary(Integer id, String firstName, String lastName, String fullName) {
+			this.id = id;
+			this.firstName = firstName;
+			this.lastName = lastName;
+			this.fullName = fullName;
+		}
 	}
 }
 
