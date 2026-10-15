@@ -42,6 +42,17 @@
         <module>infra/bills-service</module>
         <module>extras/acl-service</module>
         <module>extras/oauth2-login-service</module>
+
+        <!--
+            Las practicas son proyectos independientes (su propio padre y su
+            propio Maven embebido) y se pueden seguir lanzando desde su carpeta.
+            Se listan aqui solo para que el IDE las importe: VS Code y Eclipse
+            no buscan pom.xml anidados que no sean modulos del reactor, y sin
+            esto no hay ni autocompletado ni boton de ejecutar pruebas.
+        -->
+        <module>practicas/tareas</module>
+        <module>practicas/mapeos-jpa</module>
+        <module>practicas/mapeo-dtos</module>
     </modules>
 
     <properties>

@@ -2,11 +2,13 @@ package org.springframework.samples.petclinic.web.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -97,12 +99,19 @@ class PetRestControllerMockMvcTests {
 		Pet request = new Pet();
 		request.setName("Max");
 		request.setBirthDate(LocalDate.of(2022, 1, 5));
+		// El servicio es un mock: se imita a JPA asignando el id al guardar.
+		willAnswer(invocation -> {
+			invocation.<Pet>getArgument(0).setId(42);
+			return null;
+		}).given(petService).savePet(any(Pet.class));
 
 		mockMvc.perform(post("/api/pets")
 				.contentType(MediaType.APPLICATION_JSON)
 				.with(csrf())
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().isCreated())
+			.andExpect(header().string("Location", "http://localhost/api/pets/42"))
+			.andExpect(jsonPath("$.id").value(42))
 			.andExpect(jsonPath("$.name").value("Max"))
 			.andExpect(jsonPath("$.birthDate").value("2022/01/05"));
 

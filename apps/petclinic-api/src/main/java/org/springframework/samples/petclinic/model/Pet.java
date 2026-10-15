@@ -33,6 +33,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -76,6 +78,7 @@ public class Pet extends NamedEntity {
 	@JoinColumn(name = "owner_id")
 	@JsonSerialize(using = BaseEntitySerializer.class)
 	@JsonDeserialize(using = BaseEntityDeserializer.class)
+	@NotNull 
 	private Owner owner;
 
 	@JsonIgnore

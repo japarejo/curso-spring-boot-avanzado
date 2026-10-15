@@ -1,15 +1,18 @@
 package org.springframework.samples.petclinic.web.api;
 
+import java.net.URI;
 import java.util.Collection;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.service.PetService;
 import org.springframework.samples.petclinic.service.exceptions.DuplicatedPetNameException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -65,21 +70,29 @@ public class PetRestController {
 	@Operation(summary = "Create a pet", description = "Creates a new pet from a JSON payload.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "201", description = "Pet created successfully",
+			headers = @Header(name = "Location", description = "URL of the new pet", schema = @Schema(type = "string")),
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = Pet.class))),
 		@ApiResponse(responseCode = "400", description = "Invalid pet payload", content = @Content)
 	})
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Pet object to create", required = true,
 		content = @Content(mediaType = "application/json", schema = @Schema(implementation = Pet.class)))
 	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public Pet create(@RequestBody @Valid Pet resource) throws DuplicatedPetNameException{
+	public ResponseEntity<Pet> create(@RequestBody @Valid Pet resource) throws DuplicatedPetNameException{
+		
 		if(resource == null) {
 			throw new BadRequestException();
 		} else {
 				petService.savePet(resource);
 		}
-		
-		return resource;
+
+		// savePet() asigna el id al persistir. La URL se construye a partir de la
+		// peticion actual (esquema, host, puerto y ruta), asi que vale tras un proxy
+		// o si cambia el @RequestMapping: Location: http://host:puerto/api/pets/{id}
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+			.path("/{id}")
+			.buildAndExpand(resource.getId())
+			.toUri();
+		return ResponseEntity.created(location).body(resource);
 	}
 	
 	@Operation(summary = "Update a pet", description = "Updates an existing pet with the given ID.")
@@ -105,7 +118,7 @@ public class PetRestController {
 			}
 		}
 	}
-	
+		
 	@Operation(summary = "Delete a pet", description = "Deletes the pet identified by the given ID.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "Pet deleted successfully"),
