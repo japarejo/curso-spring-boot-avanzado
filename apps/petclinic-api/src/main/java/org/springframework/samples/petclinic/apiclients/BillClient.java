@@ -26,4 +26,5 @@ public interface BillClient {
 
 	@GetMapping("/api/v1/bills")
 	List<Bill> getBills(@RequestHeader("Authorization") String token);
+
 }

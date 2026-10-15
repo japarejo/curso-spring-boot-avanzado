@@ -70,6 +70,7 @@ public class SecurityConfiguration {
 				// queda abierta para poder explorarla con curl y con Swagger UI durante
 				// los modulos 1 y 2.
 				.requestMatchers("/api/**").permitAll()
+				.requestMatchers("/data-api/**").permitAll()
 
 				// Regla final restrictiva: lo que no se ha permitido explicitamente,
 				// se deniega. Preferible a anyRequest().authenticated(), que deja pasar
@@ -87,7 +88,7 @@ public class SecurityConfiguration {
 			// CSRF protege formularios con sesion. Se desactiva solo donde no aplica:
 			// consola H2, actuator y la API sin estado.
 			.csrf(csrf -> csrf
-				.ignoringRequestMatchers("/h2-console/**", "/actuator/**", "/api/**"))
+				.ignoringRequestMatchers("/h2-console/**", "/actuator/**", "/api/**", "/data-api/**"))
 
 			// Que hacer con una peticion SIN autenticar que la necesita:
 			//   - la web redirige al formulario de login (lo de siempre);

@@ -61,6 +61,8 @@ public class BillsGateway {
 		this.restClient = restClientBuilder
 			.baseUrl(properties.baseUrl())
 			.build();
+		
+		
 		this.restTemplate = restTemplateBuilder
 			.connectTimeout(properties.connectTimeout())
 			.readTimeout(properties.readTimeout())
@@ -76,12 +78,15 @@ public class BillsGateway {
 
 	/** Estilo recomendado hoy en aplicaciones sincronas. */
 	@CircuitBreaker(name = "bills", fallbackMethod = "sinFacturas")
-	public List<Bill> conRestClient() {
+	public List<Bill> conRestClient() {		
+
 		return restClient.get()
-			.uri("/api/v1/bills")
-			.retrieve()
+			.uri("/api/v1/bills")			
+			.retrieve()			
 			.body(new ParameterizedTypeReference<List<Bill>>() {
 			});
+
+
 	}
 
 	/** Estilo declarativo: el codigo de negocio no ve HTTP. */

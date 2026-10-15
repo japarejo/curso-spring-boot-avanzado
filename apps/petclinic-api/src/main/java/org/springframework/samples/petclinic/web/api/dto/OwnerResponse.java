@@ -19,7 +19,7 @@ public class OwnerResponse {
 	@Schema(description = "Owner identifier.", example = "1")
 	private Integer id;
 
-	@JsonView(VistasPropietario.Publica.class)
+	@JsonView(value={VistasPropietario.Publica.class, VistasPropietario.Custom.class})
 	@Schema(example = "George")
 	private String firstName;
 

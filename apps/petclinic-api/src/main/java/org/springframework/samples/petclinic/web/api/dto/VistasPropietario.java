@@ -24,4 +24,6 @@ public final class VistasPropietario {
 	public interface Admin extends Recepcion {
 	}
 
+	public interface Custom {}
+
 }

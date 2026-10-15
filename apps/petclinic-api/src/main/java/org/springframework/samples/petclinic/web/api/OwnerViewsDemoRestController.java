@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import org.springframework.boot.actuate.web.exchanges.HttpExchange.Principal;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.service.OwnerService;
@@ -53,7 +54,8 @@ public class OwnerViewsDemoRestController {
 
 		PUBLICO(VistasPropietario.Publica.class),
 		RECEPCION(VistasPropietario.Recepcion.class),
-		ADMIN(VistasPropietario.Admin.class);
+		ADMIN(VistasPropietario.Admin.class),
+		CUSTOM(VistasPropietario.Custom.class	);
 
 		private final Class<?> vista;
 
@@ -100,12 +102,12 @@ public class OwnerViewsDemoRestController {
 		content = @Content(mediaType = "application/json", schema = @Schema(implementation = OwnerResponse.class)))
 	public MappingJacksonValue porRol(@PathVariable("id") int id,
 			@Parameter(description = "Rol que decide la vista")
-			@RequestParam(name = "rol", defaultValue = "PUBLICO") Rol rol) {
+			@RequestParam(name = "rol", defaultValue = "PUBLICO") Rol rol, Principal principal) {
 		// Envuelve el objeto y le adjunta la vista. El conversor Jackson de Spring
 		// la lee al serializar: es lo mismo que hace @JsonView, pero elegido en
 		// tiempo de ejecucion.
 		MappingJacksonValue respuesta = new MappingJacksonValue(OwnerResponse.from(buscar(id)));
-		respuesta.setSerializationView(rol.getVista());
+		respuesta.setSerializationView(VistasPropietario.Custom.class);
 		return respuesta;
 	}
 
