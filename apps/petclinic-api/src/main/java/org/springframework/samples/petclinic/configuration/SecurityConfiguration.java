@@ -17,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 
 import jakarta.servlet.DispatcherType;
 
@@ -96,14 +97,12 @@ public class SecurityConfiguration {
 			//     (modulo 3, ejercicio 2), una peticion anonima a la API recibe un 302
 			//     hacia /login, y Swagger UI o fetch() lo siguen solos y muestran el
 			//     HTML del login como si fuera la respuesta.
-			.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
-				if (request.getRequestURI().startsWith(request.getContextPath() + "/api/")) {
-					API_ENTRY_POINT.commence(request, response, authException);
-				}
-				else {
-					WEB_ENTRY_POINT.commence(request, response, authException);
-				}
-			}))
+			// Un authenticationEntryPoint global desactiva la pagina generada de
+			// login. Registrar los puntos de entrada por matcher la conserva.
+			.exceptionHandling(ex -> ex
+				.defaultAuthenticationEntryPointFor(API_ENTRY_POINT,
+					request -> request.getRequestURI().startsWith(request.getContextPath() + "/api/"))
+				.defaultAuthenticationEntryPointFor(WEB_ENTRY_POINT, AnyRequestMatcher.INSTANCE))
 
 			// La consola de H2 se pinta dentro de un frame del mismo origen.
 			.headers(headers -> headers

@@ -2,7 +2,7 @@
     // =========================================================================
     // Ajustes de VS Code para el curso.
     //
-    // Este fichero SI se versiona (el resto de .vscode/ no), para que todo el
+    // Este fichero SI se versiona, junto con extensions.json y launch.json, para que todo el
     // mundo tenga el mismo comportamiento del editor el primer dia y nadie
     // pierda la primera hora de clase peleandose con marcas rojas.
     // =========================================================================

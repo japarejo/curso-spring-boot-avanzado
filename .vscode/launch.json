@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Petclinic (con vistas JSP)",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.PetclinicApplication",
+            "projectName": "petclinic-api",
+            // Tomcat busca src/main/webapp desde el directorio de trabajo.
+            "cwd": "${workspaceFolder}/apps/petclinic-api"
+        }
+    ]
+}
