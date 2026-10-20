@@ -76,6 +76,21 @@ class OwnerViewsDemoRestControllerMockMvcTests {
 	}
 
 	@Test
+	void porRolCustomShowsOnlyFirstName() throws Exception {
+		given(ownerService.findOwnerById(1)).willReturn(george());
+
+		mockMvc.perform(get("/api/v1/views-demo/owners/{id}/por-rol", 1).param("rol", "CUSTOM")
+				.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.firstName").value("George"))
+			.andExpect(jsonPath("$.id").doesNotExist())
+			.andExpect(jsonPath("$.lastName").doesNotExist())
+			.andExpect(jsonPath("$.city").doesNotExist())
+			.andExpect(jsonPath("$.telephone").doesNotExist())
+			.andExpect(jsonPath("$.username").doesNotExist());
+	}
+
+	@Test
 	void porRolRejectsUnknownRole() throws Exception {
 		mockMvc.perform(get("/api/v1/views-demo/owners/{id}/por-rol", 1).param("rol", "jefe")
 				.accept(MediaType.APPLICATION_JSON))

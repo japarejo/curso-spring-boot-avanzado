@@ -1,10 +1,10 @@
 package org.springframework.samples.petclinic.web.api;
 
+import java.security.Principal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import org.springframework.boot.actuate.web.exchanges.HttpExchange.Principal;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.service.OwnerService;
@@ -96,7 +96,7 @@ public class OwnerViewsDemoRestController {
 
 	@GetMapping("/{id}/por-rol")
 	@Operation(summary = "Detalle con la vista que corresponde al rol recibido",
-		description = "PUBLICO, RECEPCION o ADMIN. Solo demostrativo: el rol NO debe venir del cliente.")
+		description = "PUBLICO, RECEPCION, ADMIN o CUSTOM. Solo demostrativo: el rol NO debe venir del cliente.")
 	// El tipo de retorno MappingJacksonValue no dice nada a springdoc: se documenta a mano.
 	@ApiResponse(responseCode = "200", description = "Owner con los campos de la vista elegida",
 		content = @Content(mediaType = "application/json", schema = @Schema(implementation = OwnerResponse.class)))
@@ -107,7 +107,7 @@ public class OwnerViewsDemoRestController {
 		// la lee al serializar: es lo mismo que hace @JsonView, pero elegido en
 		// tiempo de ejecucion.
 		MappingJacksonValue respuesta = new MappingJacksonValue(OwnerResponse.from(buscar(id)));
-		respuesta.setSerializationView(VistasPropietario.Custom.class);
+		respuesta.setSerializationView(rol.getVista());
 		return respuesta;
 	}
 
