@@ -7,9 +7,14 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.samples.petclinic.configuration.AuditorAwareImpl;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.service.PetService;
 import org.springframework.samples.petclinic.service.exceptions.DuplicatedPetNameException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,8 +42,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/pets")
 public class PetRestController {
 	
-	@Autowired
+	private final AuditorAwareImpl auditorAwareImpl;
+    @Autowired
 	private PetService petService;
+
+    PetRestController(AuditorAwareImpl auditorAwareImpl) {
+        this.auditorAwareImpl = auditorAwareImpl;
+    }
 	
 	@Operation(summary = "List all pets", description = "Returns a collection of all registered pets.")
 	@ApiResponses(value = {
@@ -127,6 +138,25 @@ public class PetRestController {
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public void delete(@Parameter(description = "Pet identifier", required = true) @PathVariable("id") int id) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if(authentication!=null) {			
+			System.out.println("Usuario logueado: " + authentication.getName());
+			if(authentication.getAuthorities()!=null && !authentication.getAuthorities().isEmpty()) {
+				System.out.println("Roles: " + authentication.getAuthorities());
+				for(GrantedAuthority authority : authentication.getAuthorities()) {
+					System.out.println(" - " + authority.getAuthority());
+					if(authority.getAuthority().equals("owner")) {
+						Pet pet = petService.findPetById(id);
+						if(pet != null && pet.getOwner() != null) {
+							String username = authentication.getName();
+							if(!username.equals(pet.getOwner().getUser().getUsername())) {
+								throw new AccessDeniedException("El propietario logueado no es el dueño de la mascota " + id);	
+							}
+						}
+					}	
+				}
+			}
+		}
 		petService.deletePet(id);
 	}
 

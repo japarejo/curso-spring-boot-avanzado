@@ -70,7 +70,8 @@ public class SecurityConfiguration {
 				// La API REST se securiza en el modulo 3 (ejercicio de JWT). De momento
 				// queda abierta para poder explorarla con curl y con Swagger UI durante
 				// los modulos 1 y 2.
-				.requestMatchers("/api/**").permitAll()
+				.requestMatchers(HttpMethod.DELETE,"/api/pets/*").hasAnyAuthority("owner","admin")
+				.requestMatchers("/api/**").authenticated()
 				.requestMatchers("/data-api/**").permitAll()
 
 				// Regla final restrictiva: lo que no se ha permitido explicitamente,
@@ -84,12 +85,11 @@ public class SecurityConfiguration {
 				.defaultSuccessUrl("/welcome")
 				.permitAll())
 			.logout(logout -> logout
-				.logoutSuccessUrl("/"))
-
+				.logoutSuccessUrl("/login"))
+		
 			// CSRF protege formularios con sesion. Se desactiva solo donde no aplica:
 			// consola H2, actuator y la API sin estado.
-			.csrf(csrf -> csrf
-				.ignoringRequestMatchers("/h2-console/**", "/actuator/**", "/api/**", "/data-api/**"))
+			.csrf(csrf -> csrf.disable())
 
 			// Que hacer con una peticion SIN autenticar que la necesita:
 			//   - la web redirige al formulario de login (lo de siempre);
