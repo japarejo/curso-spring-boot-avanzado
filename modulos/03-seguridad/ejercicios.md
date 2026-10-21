@@ -541,3 +541,171 @@ JWT**: el resto del sistema no sabe que existe GitHub.
 **Pregunta.** ¿Qué diferencia hay entre `oauth2Login()` (este ejercicio) y
 `oauth2ResourceServer()` (ejercicio 6)? *(El primero hace que la aplicación sea **cliente**
 de un proveedor de identidad; el segundo, que **acepte** tokens emitidos por otro.)*
+
+---
+
+## Ejercicio 15 · GitHub en `petclinic-api`: identidad externa, permisos propios
+
+**Objetivo.** Añadir «Entrar con GitHub» a nuestra propia aplicación, de modo que **GitHub
+diga quién eres** y **PetClinic decida qué puedes hacer**.
+**Diapositiva:** 94. **Tiempo:** 45 min. **Requisito:** ejercicio 14 (tener una OAuth App de GitHub).
+
+> En el ejercicio 14 mirabas un servicio ya hecho. Aquí lo construyes tú sobre
+> `petclinic-api`, sin tocar ni una regla de autorización ni una vista.
+
+1. **Registra una segunda OAuth App** en GitHub (*Settings → Developer settings → OAuth
+   Apps → New OAuth App*). Una OAuth App solo admite una URL de *callback*, así que no
+   reutilices la del ejercicio 14:
+
+   | Campo | Valor |
+   |---|---|
+   | Application name | `PetClinic local` |
+   | Homepage URL | `http://localhost:8000` |
+   | Authorization callback URL | `http://localhost:8000/login/oauth2/code/github` |
+
+   El puerto es el de `server.port` en `application.properties` (8000). La URL tiene que
+   coincidir **carácter a carácter**: ni barra final, ni `127.0.0.1` en lugar de `localhost`.
+
+2. Añade `spring-boot-starter-oauth2-client` a `apps/petclinic-api/pom.xml`. Arranca sin
+   más cambios. ¿Ha cambiado algo? *(No: sin ningún proveedor registrado, la autoconfiguración
+   del cliente no se activa.)*
+
+3. Crea el perfil `github` (`application-github.properties`) con las credenciales leídas de
+   variables de entorno **sin valor por defecto**:
+
+   ```properties
+   spring.security.oauth2.client.registration.github.client-id=${GITHUB_CLIENT_ID}
+   spring.security.oauth2.client.registration.github.client-secret=${GITHUB_CLIENT_SECRET}
+   ```
+
+   Arranca con el perfil y **sin** las variables. Lee el error. Después, con ellas:
+
+   ```bash
+   export GITHUB_CLIENT_ID=...  GITHUB_CLIENT_SECRET=...
+   ./mvnw -pl apps/petclinic-api spring-boot:run -Dspring-boot.run.profiles=github
+   ```
+
+   En PowerShell: `$env:GITHUB_CLIENT_ID="..."; $env:GITHUB_CLIENT_SECRET="..."`.
+
+4. Activa `oauth2Login()` en `SecurityConfiguration` **solo si** existe un
+   `ClientRegistrationRepository` (pista: `ObjectProvider<ClientRegistrationRepository>`).
+   ¿Por qué no basta con llamar siempre a `http.oauth2Login(...)`? Pruébalo arrancando sin el
+   perfil.
+
+5. Abre <http://localhost:8000/login>. La página generada muestra ahora el formulario **y**
+   un enlace *GitHub*. Entra con GitHub y, ya dentro, prueba:
+   - <http://localhost:8000/owners/find> → ¿403? ¿Por qué?
+   - Pon `logging.level.org.springframework.security=DEBUG` y busca qué autoridades tienes
+     (`OAUTH2_USER`, `SCOPE_read:user`) y cuál es tu `Principal.getName()` (tu id numérico).
+
+   **Problema.** Cualquier persona con cuenta en GitHub puede entrar, y sus autoridades no
+   significan nada para PetClinic.
+
+6. Crea `GitHubOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User>`
+   que:
+   1. delegue en `DefaultOAuth2UserService` para obtener el usuario de GitHub;
+   2. busque su **id numérico** en una tabla de vínculos `petclinic.github.vinculos.<id>=<usuario>`
+      (un `@ConfigurationProperties`, como en el módulo 5). Tu id:
+      <https://api.github.com/users/TU-LOGIN>;
+   3. si no hay vínculo, lance `OAuth2AuthenticationException` (lista blanca);
+   4. cargue el usuario local con el `UserDetailsManager` que ya existe y rechace si está
+      deshabilitado;
+   5. devuelva un `DefaultOAuth2User` con las **autoridades locales** y cuyo nombre sea el
+      **username local**.
+
+   Regístralo con `.userInfoEndpoint(info -> info.userService(...))`.
+
+7. Vincula tu cuenta con `owner1` y repite el paso 5. Entra en
+   <http://localhost:8000/owners/1> y después en <http://localhost:8000/owners/2>.
+
+8. Escribe las pruebas **sin red**:
+   - unitarias del servicio, sustituyendo GitHub por una lambda;
+   - de la cadena de filtros con `@SpringBootTest(properties = ...client-id=...)`: que
+     `/oauth2/authorization/github` redirija a `https://github.com/login/oauth/authorize`;
+   - de autorización con `.with(oauth2Login().oauth2User(...))` de `spring-security-test`.
+
+**Resultado esperado.** Una cuenta de GitHub sin vincular vuelve a `/login?error` con el
+mensaje del servicio. La vinculada con `owner1` ve su ficha (`/owners/1`) y **no** la de otro
+propietario: la comprobación de propiedad de `OwnerService.findOwnerById(int, Principal)`
+funciona sin cambios, porque `Principal.getName()` vale `owner1` tanto si entró por formulario
+como por GitHub.
+
+> **Mensaje clave.** Autenticación delegada **no** es autorización delegada. GitHub garantiza
+> que eres el dueño de esa cuenta; no sabe nada de propietarios ni veterinarios. Por eso el
+> vínculo se hace con el **id** (estable) y no con el `login` (se puede cambiar, y otra persona
+> puede quedarse el antiguo) ni con el email (puede ser privado o no estar verificado).
+
+**Preguntas.**
+- `extras/oauth2-login-service` da de alta automáticamente a quien entra por primera vez, con
+  autoridad `owner`. ¿Qué riesgo tendría hacer eso en `petclinic-api`?
+- ¿Qué cambiarías para permitir solo a los miembros de una organización de GitHub? *(Pedir el
+  *scope* `read:org` y consultar `https://api.github.com/user/orgs` con el token del
+  `OAuth2UserRequest`.)*
+- Entra con GitHub, cierra sesión en PetClinic y vuelve a pulsar *GitHub*. ¿Te pide la
+  contraseña? ¿Por qué? *(Cerrar sesión en la aplicación no cierra la de GitHub.)*
+
+Solución: [`soluciones/Ejercicio15LoginGitHub.java`](soluciones/Ejercicio15LoginGitHub.java)
+
+---
+
+## Ejercicio 16 · Alta automática la primera vez que se entra con GitHub
+
+**Objetivo.** Que quien entre con GitHub por primera vez obtenga **su propia cuenta** en
+PetClinic y quede autenticado, sin que nadie tenga que darle de alta a mano.
+**Tiempo:** 45 min. **Requisito:** ejercicio 15.
+
+> En el ejercicio 15 los vínculos estaban en un fichero de propiedades: solo entraba quien
+> el administrador había apuntado. Ahora el vínculo se **guarda en la base de datos** y se
+> crea solo.
+
+1. Crea la entidad `CuentaGitHub` (tabla `github_accounts`) con el id numérico de GitHub
+   como clave, el `login`, el `User` vinculado y las fechas de alta y de último acceso.
+   Añade su repositorio.
+2. Crea `AltaGitHubService.usuarioPara(long githubId, String login)`, `@Transactional`, que
+   devuelva el usuario local según este orden:
+   1. si el id ya está en `github_accounts`, ese usuario (y actualiza el `login`, que puede
+      haber cambiado);
+   2. si está en `petclinic.github.vinculos`, vincúlalo al usuario que ya existe;
+   3. si `petclinic.github.alta-automatica=true`, crea un `User` nuevo con la autoridad de
+      `petclinic.github.autoridad-inicial` (por defecto `owner`) y vincúlalo;
+   4. si no, devuelve vacío.
+3. Al crear el usuario:
+   - nómbralo `gh-<login>`, y si ya existe, `gh-<login>-2`, `-3`... ¿Por qué el prefijo?
+     *(Un usuario de GitHub llamado `admin1` no debe convertirse en el `admin1` de PetClinic.)*
+   - dale una contraseña **aleatoria cifrada**. ¿Qué pasaría con una contraseña vacía o con
+     `{noop}`? *(Cualquiera podría entrar por el formulario con ese nombre de usuario.)*
+4. Cambia `GitHubOAuth2UserService` para que use `AltaGitHubService` en lugar de las
+   propiedades.
+5. Ejecuta **toda** la batería de pruebas. `OwnerServiceTests` y `VetServiceTests` dejan de
+   arrancar: usan `@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))`, que
+   carga **todos** los `@Service`, el tuyo incluido, pero no la configuración de seguridad ni
+   `@ConfigurationPropertiesScan`. Arréglalo sin tocar esas pruebas.
+6. Arranca con el perfil `github` y `petclinic.github.alta-automatica=true`. Entra con
+   GitHub y comprueba en la consola H2 (<http://localhost:8000/h2-console>) las filas nuevas
+   en `users`, `authorities` y `github_accounts`. Cierra sesión y vuelve a entrar: ¿se crea
+   otra cuenta?
+7. Escribe las pruebas: primera vez, segunda vez con el login cambiado, vínculo
+   preconfigurado, dos cuentas con el mismo login, alta desactivada, y que la cuenta nueva
+   **no** pueda entrar por formulario.
+
+**Resultado esperado.** La primera vez se crea `gh-<tu-login>` con autoridad `owner` y entras
+directamente; la segunda se reutiliza la misma cuenta. Con la alta automática desactivada,
+una cuenta desconocida vuelve a `/login?error` y no se crea nada.
+
+> **Mensaje clave.** El alta automática convierte «tener cuenta en GitHub» en «ser cliente
+> de la clínica». Es cómodo y es una decisión de negocio, no técnica: por eso va desactivada
+> por defecto, da la autoridad **mínima** y nunca `admin`.
+
+**Preguntas.**
+- La cuenta nueva tiene autoridad `owner` pero ningún registro en `owners`. ¿Qué ve en
+  `/owners/1`? ¿Cómo le pedirías los datos que faltan (dirección, teléfono) la primera vez?
+  *(Un `AuthenticationSuccessHandler` que redirija a un formulario «completa tu perfil» si
+  `ownerRepository.findByUserName(...)` devuelve `null`.)*
+- ¿Por qué `GitHubOAuth2UserService` llama a `AltaGitHubService` y **después** a
+  `UserDetailsManager`, y no al revés, en la misma transacción? *(`JdbcUserDetailsManager`
+  lee con JDBC en su propia conexión: solo ve el usuario nuevo cuando la transacción del alta
+  ya se ha confirmado.)*
+- Con el perfil `mysql` la aplicación no arranca. ¿Por qué? *(`ddl-auto=validate`: falta la
+  migración de Flyway que crea `github_accounts`.)*
+
+Solución: [`soluciones/Ejercicio16AltaConGitHub.java`](soluciones/Ejercicio16AltaConGitHub.java)

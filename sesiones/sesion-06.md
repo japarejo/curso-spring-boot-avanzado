@@ -154,6 +154,9 @@ en casa.
 - **Tarea:**
   - Ejercicio 7 (auditoría del proyecto con el OWASP API Top 10).
   - Ejercicio 14: registrar vuestra propia OAuth App y entrar con GitHub.
+  - Ejercicio 15: añadir el login con GitHub a `petclinic-api`, con los permisos de la base
+    de datos local.
+  - Ejercicio 16 (opcional): alta automática de la cuenta la primera vez que se entra con GitHub.
   - Quien hizo el 6, que intente el 13 (o al revés).
 
 ---
@@ -165,6 +168,8 @@ en casa.
 
 ## Si te sobra tiempo
 
+- Empezar en clase el ejercicio 15 (GitHub en `petclinic-api`): al menos los pasos 1–5, que
+  muestran el problema de las autoridades `OAUTH2_USER`.
 - Ejercicio 15 del módulo 4 adelantado: pruebas automáticas de las reglas que acabáis de
   escribir, incluido `.with(jwt())`.
 - Rotación de claves: ¿qué pasa con los tokens emitidos si cambia el secreto?
@@ -177,4 +182,4 @@ en casa.
 | 401 con un token recién emitido | Secreto distinto en `auth-service` y `petclinic-api`, o falta el prefijo `Bearer `. |
 | El filtro se ejecuta dos veces | Está anotado con `@Component`. |
 | La cadena de la API no se aplica | Falta `@Order` o el `securityMatcher` no encaja. |
-| GitHub responde *redirect_uri mismatch* | La URL de *callback* registrada no es exactamente `http://localhost:8062/login/oauth2/code/github`. |
+| GitHub responde *redirect_uri mismatch* | La URL de *callback* registrada no es exactamente `http://localhost:8062/login/oauth2/code/github` (ejercicio 14) o `http://localhost:8000/login/oauth2/code/github` (ejercicio 15). |

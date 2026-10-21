@@ -32,6 +32,7 @@ Guion docente. Duración estimada: **dos sesiones de 120 minutos**.
 | Emisión y validación de JWT | `infra/auth-service/` |
 | Firma simétrica / asimétrica | `auth/security/HmacJwtTokenService`, `RsaJwtTokenService` |
 | Pruebas de seguridad | `src/test/.../web/security/PetControllerSecurityTest.java` |
+| Login con GitHub (OAuth 2) | ejercicios 14 a 16, `extras/oauth2-login-service` |
 | ACL por instancia (ampliación) | [`guion-acl.md`](guion-acl.md) |
 
 ---
@@ -206,3 +207,5 @@ Ampliación: [`guion-acl.md`](guion-acl.md), permisos por instancia con `spring-
 | "He iniciado sesión pero sigo sin poder entrar" | La autoridad del usuario no coincide con la del matcher. Comprobar `data.sql`. |
 | El JWT se rechaza siempre | El secreto de quien firma no coincide con el de quien valida, o el reloj de la máquina va desajustado. |
 | `IllegalArgumentException` al arrancar con HS512 | El secreto tiene menos de 512 bits. jjwt lo comprueba a propósito. |
+| GitHub responde *redirect_uri mismatch* | La *callback* registrada no coincide con `http://localhost:<puerto>/login/oauth2/code/github` (8062 en `oauth2-login-service`, 8000 en `petclinic-api`). |
+| Entras con GitHub pero todo da 403 | Falta el `OAuth2UserService` propio: las autoridades son `OAUTH2_USER` y `SCOPE_*`, no las de la tabla `authorities` (ejercicio 15). |
