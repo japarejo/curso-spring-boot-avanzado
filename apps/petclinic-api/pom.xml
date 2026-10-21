@@ -94,6 +94,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
+        <!-- Cliente OAuth2: login con GitHub (perfil github, ejercicios 15 y 16) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
         <!-- <sec:authorize> en las JSP -->
         <dependency>
             <groupId>org.springframework.security</groupId>

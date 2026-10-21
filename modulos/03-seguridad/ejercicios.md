@@ -552,6 +552,11 @@ diga quién eres** y **PetClinic decida qué puedes hacer**.
 
 > En el ejercicio 14 mirabas un servicio ya hecho. Aquí lo construyes tú sobre
 > `petclinic-api`, sin tocar ni una regla de autorización ni una vista.
+>
+> **La solución ya está integrada en `petclinic-api`** (ejercicios 15 y 16 juntos), activa
+> solo con el perfil `github`. Para verla funcionar, basta con el paso 1 y arrancar con
+> `-Dspring-boot.run.profiles=github`. Para hacer el ejercicio desde cero, trabaja en una rama
+> creada desde el commit `7b4ac87`, anterior a la integración.
 
 1. **Registra una segunda OAuth App** en GitHub (*Settings → Developer settings → OAuth
    Apps → New OAuth App*). Una OAuth App solo admite una URL de *callback*, así que no
@@ -657,6 +662,10 @@ PetClinic y quede autenticado, sin que nadie tenga que darle de alta a mano.
 > En el ejercicio 15 los vínculos estaban en un fichero de propiedades: solo entraba quien
 > el administrador había apuntado. Ahora el vínculo se **guarda en la base de datos** y se
 > crea solo.
+>
+> Ya integrado en `petclinic-api`: `service/AltaGitHubService`, `model/CuentaGitHub`,
+> `configuration/GitHubOAuth2UserService` y `resources/application-github.properties`
+> (con `petclinic.github.alta-automatica=true`).
 
 1. Crea la entidad `CuentaGitHub` (tabla `github_accounts`) con el id numérico de GitHub
    como clave, el `login`, el `User` vinculado y las fechas de alta y de último acceso.

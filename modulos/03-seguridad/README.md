@@ -32,7 +32,8 @@ Guion docente. Duración estimada: **dos sesiones de 120 minutos**.
 | Emisión y validación de JWT | `infra/auth-service/` |
 | Firma simétrica / asimétrica | `auth/security/HmacJwtTokenService`, `RsaJwtTokenService` |
 | Pruebas de seguridad | `src/test/.../web/security/PetControllerSecurityTest.java` |
-| Login con GitHub (OAuth 2) | ejercicios 14 a 16, `extras/oauth2-login-service` |
+| Login con GitHub (OAuth 2) | perfil `github`: `configuration/GitHubOAuth2UserService`, `application-github.properties` (ejercicios 14 a 16) |
+| Alta automática con GitHub | `service/AltaGitHubService`, tabla `github_accounts` (`V3__cuentas_github.sql`) |
 | ACL por instancia (ampliación) | [`guion-acl.md`](guion-acl.md) |
 
 ---

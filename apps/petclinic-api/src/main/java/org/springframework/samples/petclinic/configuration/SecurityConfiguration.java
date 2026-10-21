@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic.configuration;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,6 +14,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.samples.petclinic.service.AltaGitHubService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -44,7 +47,20 @@ public class SecurityConfiguration {
 
 	// 1. AUTORIZACION, LOGIN, CSRF Y CABECERAS ---------------------------------
 	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain filterChain(HttpSecurity http,
+			ObjectProvider<ClientRegistrationRepository> registros,
+			UserDetailsManager users, AltaGitHubService altas) throws Exception {
+
+		// Login con GitHub (modulo 3, ejercicios 15 y 16). Solo si hay algun
+		// proveedor configurado, es decir, arrancando con el perfil "github".
+		// Sin este if, oauth2Login() rompe el arranque cuando no hay credenciales.
+		// GitHub dice QUIEN eres; GitHubOAuth2UserService decide QUE puedes hacer
+		// y, si es la primera vez y esta permitido, te crea la cuenta.
+		if (registros.getIfAvailable() != null) {
+			http.oauth2Login(oauth -> oauth
+				.userInfoEndpoint(info -> info.userService(new GitHubOAuth2UserService(altas, users)))
+				.defaultSuccessUrl("/welcome"));
+		}
 
 		http
 			.authorizeHttpRequests(auth -> auth
