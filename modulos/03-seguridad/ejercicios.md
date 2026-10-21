@@ -707,5 +707,7 @@ una cuenta desconocida vuelve a `/login?error` y no se crea nada.
   ya se ha confirmado.)*
 - Con el perfil `mysql` la aplicación no arranca. ¿Por qué? *(`ddl-auto=validate`: falta la
   migración de Flyway que crea `github_accounts`.)*
+  Escribe `V3__cuentas_github.sql` y compruébalo con Testcontainers, tomando como modelo
+  `OwnerRepositoryMySqlContainerIT`.
 
 Solución: [`soluciones/Ejercicio16AltaConGitHub.java`](soluciones/Ejercicio16AltaConGitHub.java)
