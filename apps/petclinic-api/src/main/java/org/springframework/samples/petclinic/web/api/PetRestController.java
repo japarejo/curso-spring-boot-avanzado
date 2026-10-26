@@ -137,9 +137,8 @@ public class PetRestController {
 	})
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public void delete(@Parameter(description = "Pet identifier", required = true) @PathVariable("id") int id) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if(authentication!=null) {			
+	public void delete(@Parameter(description = "Pet identifier", required = true) @PathVariable("id") int id, Authentication authentication) {		
+		/** if(authentication!=null) {			
 			System.out.println("Usuario logueado: " + authentication.getName());
 			if(authentication.getAuthorities()!=null && !authentication.getAuthorities().isEmpty()) {
 				System.out.println("Roles: " + authentication.getAuthorities());
@@ -156,7 +155,7 @@ public class PetRestController {
 					}	
 				}
 			}
-		}
+		}*/
 		petService.deletePet(id);
 	}
 

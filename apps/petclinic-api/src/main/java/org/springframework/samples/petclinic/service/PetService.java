@@ -27,6 +27,9 @@ import org.springframework.samples.petclinic.repository.PetRepository;
 import org.springframework.samples.petclinic.repository.PetSpecification;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 import org.springframework.samples.petclinic.service.exceptions.DuplicatedPetNameException;
+import org.springframework.samples.petclinic.web.api.ResourceNotFoundException;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -86,8 +89,15 @@ public class PetService {
 		return visitRepository.findByPetId(petId);
 	}
 
-	public void deletePet(int id) {
+	@PreAuthorize ("hasAuthority('admin') or hasAuthority('owner')")
+	@PostAuthorize ("returnObject.owner.user.username == authentication.name or hasAuthority('admin')")
+	public Pet deletePet(int id) {
+		Pet pet = petRepository.findById(id);
+		if(pet == null) {
+			throw new ResourceNotFoundException();
+		}
 		petRepository.deleteById(id);
+		return pet;
 	}
 
 	/**

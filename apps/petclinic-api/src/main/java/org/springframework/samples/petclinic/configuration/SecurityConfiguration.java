@@ -75,7 +75,7 @@ public class SecurityConfiguration {
 				.requestMatchers("/h2-console/**").permitAll()
 
 				// Documentacion y diagnostico
-				.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+				.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**","/mi-documentacion**").permitAll()
 				.requestMatchers("/actuator/**", "/logging").permitAll()
 
 				// Reglas de negocio por rol
@@ -86,7 +86,7 @@ public class SecurityConfiguration {
 				// La API REST se securiza en el modulo 3 (ejercicio de JWT). De momento
 				// queda abierta para poder explorarla con curl y con Swagger UI durante
 				// los modulos 1 y 2.
-				.requestMatchers(HttpMethod.DELETE,"/api/pets/*").hasAnyAuthority("owner","admin")
+				.requestMatchers(HttpMethod.DELETE,"/api/pets/*").permitAll()
 				.requestMatchers("/api/**").authenticated()
 				.requestMatchers("/data-api/**").permitAll()
 
