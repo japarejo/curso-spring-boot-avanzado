@@ -105,7 +105,8 @@ public class SecurityConfiguration {
 		
 			// CSRF protege formularios con sesion. Se desactiva solo donde no aplica:
 			// consola H2, actuator y la API sin estado.
-			.csrf(csrf -> csrf.disable())
+			.csrf(csrf -> csrf
+				.ignoringRequestMatchers("/h2-console/**", "/actuator/**", "/api/**", "/data-api/**"))
 
 			// Que hacer con una peticion SIN autenticar que la necesita:
 			//   - la web redirige al formulario de login (lo de siempre);

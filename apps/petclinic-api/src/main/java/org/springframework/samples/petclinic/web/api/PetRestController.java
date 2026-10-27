@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.configuration.AuditorAwareImpl;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.service.PetService;
 import org.springframework.samples.petclinic.service.exceptions.DuplicatedPetNameException;
@@ -41,15 +40,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/pets")
 public class PetRestController {
-	
-	private final AuditorAwareImpl auditorAwareImpl;
+
     @Autowired
 	private PetService petService;
 
-    PetRestController(AuditorAwareImpl auditorAwareImpl) {
-        this.auditorAwareImpl = auditorAwareImpl;
-    }
-	
 	@Operation(summary = "List all pets", description = "Returns a collection of all registered pets.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "Pets returned successfully",

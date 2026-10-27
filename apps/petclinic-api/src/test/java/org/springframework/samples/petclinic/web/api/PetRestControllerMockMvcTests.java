@@ -16,15 +16,20 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
+import org.springframework.samples.petclinic.configuration.GenericIdToEntityConverter;
+import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
 import org.springframework.samples.petclinic.service.PetService;
+import org.springframework.samples.petclinic.web.PetTypeFormatter;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -40,6 +45,22 @@ class PetRestControllerMockMvcTests {
 
 	@MockitoBean
 	PetService petService;
+
+	// Los deserializadores JSON de Pet dependen de estos beans, que @WebMvcTest
+	// no carga. El dueño llega como id ("owner": 1) y lo resuelve el conversor;
+	// sin él quedaría a null y fallaría el @NotNull de Pet.owner.
+	@MockitoBean
+	GenericIdToEntityConverter idToEntityConverter;
+
+	@MockitoBean
+	PetTypeFormatter petTypeFormatter;
+
+	@BeforeEach
+	void ownerOneExists() {
+		Owner owner = new Owner();
+		owner.setId(1);
+		given(idToEntityConverter.convert(1, Owner.class)).willReturn(owner);
+	}
 
 	@Test
 	void shouldListPetsUsingMockMvc() throws Exception {
@@ -108,7 +129,7 @@ class PetRestControllerMockMvcTests {
 		mockMvc.perform(post("/api/pets")
 				.contentType(MediaType.APPLICATION_JSON)
 				.with(csrf())
-				.content(objectMapper.writeValueAsString(request)))
+				.content(withOwner(request, 1)))
 			.andExpect(status().isCreated())
 			.andExpect(header().string("Location", "http://localhost/api/pets/42"))
 			.andExpect(jsonPath("$.id").value(42))
@@ -126,7 +147,7 @@ class PetRestControllerMockMvcTests {
 				.contentType(MediaType.APPLICATION_JSON)
 				.with(csrf())
 				.content("""
-					{"name":"Bo"}
+					{"name":"Bo","owner":1}
 					"""))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.title").value("Peticion no valida"))
@@ -153,4 +174,9 @@ class PetRestControllerMockMvcTests {
 		return pet;
 	}
 
+	private String withOwner(Pet pet, int ownerId) {
+		ObjectNode body = objectMapper.valueToTree(pet);
+		body.put("owner", ownerId);
+		return body.toString();
+	}
 }

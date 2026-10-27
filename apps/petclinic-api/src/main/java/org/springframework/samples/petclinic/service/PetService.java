@@ -77,11 +77,13 @@ public class PetService {
 
 	@Transactional(rollbackFor = DuplicatedPetNameException.class)
 	public void savePet(Pet pet) throws DataAccessException, DuplicatedPetNameException {
-			/*Pet otherPet=pet.getOwner().getPetwithIdDifferent(pet.getName(), pet.getId());
-            if (StringUtils.hasLength(pet.getName()) &&  (otherPet!= null && otherPet.getId()!=pet.getId())) {            	
-            	throw new DuplicatedPetNameException();
-            }else*/
-                petRepository.save(pet);                
+		if (pet.getOwner() != null && StringUtils.hasLength(pet.getName())) {
+			Pet otherPet = pet.getOwner().getPetwithIdDifferent(pet.getName(), pet.getId());
+			if (otherPet != null) {
+				throw new DuplicatedPetNameException();
+			}
+		}
+		petRepository.save(pet);
 	}
 
 

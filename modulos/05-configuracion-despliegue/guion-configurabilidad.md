@@ -443,6 +443,56 @@ info.lesson=configuration
 curl http://localhost:8040/actuator/info
 ```
 
+### Actualizacion automatica de configuracion (sin reiniciar)
+
+Cambiar el fichero remoto no hace que Config Server avise por si solo a los
+servicios cliente. En esta demo, Bills lee la configuracion al arrancar; para
+actualizar una propiedad compatible sin reiniciar, hay que llamar a
+`POST /actuator/refresh`. El controlador que demuestra `user.role` usa
+`@RefreshScope`, pero no todos los beans ni todos los cambios se pueden
+actualizar de esta forma.
+
+Para automatizar la notificacion se puede usar **Spring Cloud Bus**. No es un
+reinicio de proceso: distribuye un evento de refresco a los servicios
+conectados a un broker de mensajes, normalmente RabbitMQ o Kafka.
+
+Flujo habitual si la configuracion esta en Git:
+
+```text
+commit en Git -> webhook al Config Server (/monitor)
+             -> Spring Cloud Bus -> evento de refresco a los clientes
+             -> cada cliente actualiza sus beans refrescables
+```
+
+Para montar esta opcion se necesita, a grandes rasgos:
+
+1. Añadir Spring Cloud Bus al Config Server y a los servicios cliente, junto
+   con el conector del broker elegido, por ejemplo
+   `spring-cloud-starter-bus-amqp` para RabbitMQ.
+2. Configurar y arrancar el broker, y exponer de forma segura los endpoints
+   de Actuator que se vayan a utilizar.
+3. Configurar un webhook del repositorio Git para que notifique al Config
+   Server cuando cambie la configuracion. Spring Cloud Config Monitor recibe
+   esa notificacion en `/monitor` y, junto con Bus, difunde el evento.
+4. Marcar con `@RefreshScope` los componentes que deban recrearse al refrescar
+   sus propiedades.
+
+Como alternativa, un operador puede disparar manualmente
+`POST /actuator/busrefresh` para difundir el refresco. Si solo se llama a
+`POST /actuator/refresh` en un cliente, se actualiza ese cliente, no todos.
+
+**Importante:** el refresco no equivale a reiniciar la aplicacion. Si el
+cambio requiere un nuevo proceso o no es compatible con refresco en caliente,
+hay que reiniciar el servicio, normalmente mediante un despliegue rolling del
+orquestador. Spring Boot DevTools puede reiniciar durante el desarrollo al
+cambiar clases o recursos del classpath, pero no detecta por si solo cambios
+remotos en Config Server. La configuracion de este repositorio demuestra el
+refresco manual de Bills; no incluye Bus, broker ni webhook.
+
+No expongas `/monitor`, `/actuator/refresh` ni `/actuator/busrefresh` sin
+autenticacion y autorizacion adecuadas: permiten alterar el comportamiento de
+las aplicaciones.
+
 ### 96-108 min: perfiles en Spring Boot
 
 Este bloque encaja al final de la sesion 1, justo despues de explicar Config Server. Si la sesion va justa, muestra solo la comprobacion contra Config Server y deja el arranque de Bills como ejercicio.

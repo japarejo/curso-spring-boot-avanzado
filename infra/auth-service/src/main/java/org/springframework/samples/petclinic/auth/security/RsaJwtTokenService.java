@@ -47,6 +47,7 @@ public class RsaJwtTokenService extends AbstractJwtTokenService {
 
 	@Override
 	protected JwtBuilder sign(JwtBuilder builder) {
+		System.out.println("Firmando con algoritmo:"+algorithm());
 		return builder.signWith(clavePrivada, Jwts.SIG.RS256);
 	}
 

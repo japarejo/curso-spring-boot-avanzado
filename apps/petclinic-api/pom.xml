@@ -24,7 +24,7 @@
             aplicaciones no embebidos"): este mismo artefacto se puede ejecutar con
             `java -jar` o desplegar en un Tomcat externo.
     -->
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <finalName>petclinic-api</finalName>
@@ -163,12 +163,13 @@
             <groupId>de.codecentric</groupId>
             <artifactId>spring-boot-admin-starter-client</artifactId>
         </dependency>
-        <!-- Recarga en caliente durante las clases -->
+        <!-- Recarga en caliente durante las clases 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
         </dependency>
+        -->
 
         <!-- ============================================================
              Capa de vista JSP (minima, solo para el modulo 3)

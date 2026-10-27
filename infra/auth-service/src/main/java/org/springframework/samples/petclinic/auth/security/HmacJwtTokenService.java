@@ -42,6 +42,7 @@ public class HmacJwtTokenService extends AbstractJwtTokenService {
 
 	@Override
 	protected JwtBuilder sign(JwtBuilder builder) {
+		System.out.println("Firmando con algoritmo:"+algorithm());
 		return builder.signWith(clave, Jwts.SIG.HS512);
 	}
 
