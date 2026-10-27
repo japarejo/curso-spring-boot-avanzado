@@ -52,3 +52,6 @@ desktop.ini
 register-oauth2-credentials.bat
 application-local.properties
 application-local.yaml
+
+# --- Ejercicio 14 del modulo 5: certificados generados en local ---
+infra/config-server/tls/

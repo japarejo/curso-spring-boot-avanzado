@@ -452,6 +452,54 @@ actualizar una propiedad compatible sin reiniciar, hay que llamar a
 `@RefreshScope`, pero no todos los beans ni todos los cambios se pueden
 actualizar de esta forma.
 
+#### Forzar la recarga desde Windows PowerShell
+
+Para que el cambio se vea sin recompilar, Config Server tiene que leer el
+`config-repo` de disco y no del classpath:
+
+```powershell
+.\mvnw -pl infra/config-server spring-boot:run "-Dspring-boot.run.arguments=--spring.cloud.config.server.native.search-locations=file:infra/config-server/src/main/resources/config-repo"
+```
+
+Con Bills arrancado, edita `user.role` en
+`config-repo/bills-service-development.properties` y luego:
+
+```powershell
+# 1. Valor actual: todavia el antiguo
+Invoke-RestMethod http://localhost:8040/api/v1/bills/whoami/alumno
+
+# 2. Pedir a Bills que vuelva a leer su configuracion
+Invoke-RestMethod -Method Post -Uri http://localhost:8040/actuator/refresh -ContentType 'application/json'
+
+# 3. Valor nuevo
+Invoke-RestMethod http://localhost:8040/api/v1/bills/whoami/alumno
+```
+
+El `-ContentType` no sobra: sin el, Windows PowerShell 5.1 envia el `POST`
+como `application/x-www-form-urlencoded` y Actuator responde **415**.
+
+El `POST` del paso 2 devuelve la lista de propiedades que han cambiado, por
+ejemplo `user.role`. Si devuelve una lista vacia, Config Server no ha visto el
+cambio: casi siempre es porque sigue sirviendo `classpath:/config-repo`.
+
+Equivalente con `curl`. En Windows PowerShell 5.1, `curl` es un alias de
+`Invoke-WebRequest` y no entiende `-X`, asi que hay que llamar a `curl.exe`:
+
+```powershell
+curl.exe -X POST http://localhost:8040/actuator/refresh
+```
+
+Si el endpoint esta protegido con Basic (como Actuator en el ejercicio 9), se
+pasan las credenciales:
+
+```powershell
+$cred = Get-Credential   # usuario y clave con permiso sobre /actuator/refresh
+Invoke-RestMethod -Method Post -Uri http://localhost:8040/actuator/refresh -ContentType 'application/json' -Credential $cred
+```
+
+Tambien se puede lanzar desde Swagger UI de Bills (<http://localhost:8040/>):
+*Actuator* → `POST /actuator/refresh` → **Execute**.
+
 Para automatizar la notificacion se puede usar **Spring Cloud Bus**. No es un
 reinicio de proceso: distribuye un evento de refresco a los servicios
 conectados a un broker de mensajes, normalmente RabbitMQ o Kafka.
@@ -492,6 +540,37 @@ refresco manual de Bills; no incluye Bus, broker ni webhook.
 No expongas `/monitor`, `/actuator/refresh` ni `/actuator/busrefresh` sin
 autenticacion y autorizacion adecuadas: permiten alterar el comportamiento de
 las aplicaciones.
+
+Con Bus montado, el refresco de todas las instancias se pide una sola vez, al
+Config Server o a cualquier cliente conectado al broker:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://localhost:8889/actuator/busrefresh -ContentType 'application/json'
+# Solo las instancias de una aplicacion:
+Invoke-RestMethod -Method Post -Uri "http://localhost:8889/actuator/busrefresh/bills-service:**" -ContentType 'application/json'
+```
+
+#### Librerias para recargar la configuracion cuando cambia
+
+| Libreria (artifactId) | Que hace | Cuando usarla |
+|---|---|---|
+| `spring-cloud-starter-bus-amqp` / `spring-cloud-starter-bus-kafka` (**Spring Cloud Bus**) | Difunde el evento de refresco a todas las instancias a traves de RabbitMQ o Kafka y expone `/actuator/busrefresh` | Varias instancias que leen de Config Server |
+| `spring-cloud-config-monitor` (**Spring Cloud Config Monitor**) | Anade `/monitor` al Config Server. Recibe el webhook de GitHub, GitLab o Bitbucket tras un `push` y, junto con Bus, refresca solo las aplicaciones afectadas | Recarga totalmente automatica con backend Git |
+| `spring-cloud-context` (ya viene con `spring-cloud-starter-config`) | Aporta `@RefreshScope`, `/actuator/refresh` y el re-enlace de los `@ConfigurationProperties` | Siempre: es la base de las demas |
+| **Spring Cloud Kubernetes Configuration Watcher** | Vigila `ConfigMap` y `Secret` y avisa a las aplicaciones, con una llamada a `/actuator/refresh` o mediante Bus | Despliegues en Kubernetes |
+| `spring-cloud-starter-consul-config` (**Spring Cloud Consul**) | El cliente sondea Consul (*config watch*) y refresca solo, sin broker ni webhook | Configuracion guardada en Consul |
+
+La pieza que suele buscarse es la combinacion **Config Monitor + Bus**: un
+`push` a Git dispara el webhook a `/monitor`, y Bus reparte el refresco sin
+que nadie llame a `/actuator/refresh`.
+
+Documentacion oficial:
+
+- Refresh scope: <https://docs.spring.io/spring-cloud-commons/reference/spring-cloud-commons/application-context-services.html#refresh-scope>
+- Push notifications y Bus en Config Server: <https://docs.spring.io/spring-cloud-config/reference/server/push-notifications-and-bus.html>
+- Spring Cloud Bus: <https://docs.spring.io/spring-cloud-bus/reference/>
+- Kubernetes Configuration Watcher: <https://docs.spring.io/spring-cloud-kubernetes/reference/spring-cloud-kubernetes-configuration-watcher.html>
+- Consul Config Watch: <https://docs.spring.io/spring-cloud-consul/reference/config.html>
 
 ### 96-108 min: perfiles en Spring Boot
 

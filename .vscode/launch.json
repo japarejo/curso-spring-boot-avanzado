@@ -3,11 +3,38 @@
     "configurations": [
         {
             "type": "java",
+            "name": "AdminServerApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.admin.AdminServerApplication",
+            "projectName": "admin-server"
+        },
+        {
+            "type": "java",
+            "name": "RegistryApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.registry.RegistryApplication",
+            "projectName": "registry"
+        },
+        {
+            "type": "java",
+            "name": "AuthServiceApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.auth.AuthServiceApplication",
+            "projectName": "auth-service"
+        },
+        {
+            "type": "java",
+            "name": "ConfigServerApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.config.ConfigServerApplication",
+            "projectName": "config-server"
+        },
+        {
+            "type": "java",
             "name": "Petclinic (con vistas JSP)",
             "request": "launch",
             "mainClass": "org.springframework.samples.petclinic.PetclinicApplication",
             "projectName": "petclinic-api",
-            // Tomcat busca src/main/webapp desde el directorio de trabajo.
             "cwd": "${workspaceFolder}/apps/petclinic-api"
         }
     ]

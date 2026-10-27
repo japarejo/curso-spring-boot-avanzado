@@ -492,3 +492,80 @@ hacían falta? *(Con una base de datos embebida, Spring Boot usa `create-drop` y
 `data.sql` por defecto; con una externa, no toca el esquema salvo que se le pida.)*
 
 Solución: [`soluciones/Ejercicio13ComposeIntegrado.md`](soluciones/Ejercicio13ComposeIntegrado.md)
+
+---
+
+## Ejercicio 14 · Consumir el Config Server de forma segura (variante extra, opcional)
+
+**Objetivo.** Cerrar el hueco que deja abierto el ejercicio 10: el servidor descifra los
+secretos antes de servirlos, así que cualquiera que llegue al puerto 8889 los lee en claro.
+**Diapositivas:** 142. **Tiempo:** 30 min la parte A y 20 min la parte B. **Requisito:**
+el ejercicio 10, parte A.
+
+> **Ya está preparado en el repositorio y desactivado.** `config-server` lleva Spring
+> Security, pero sin el perfil `secure` lo deja todo abierto (`SecurityConfiguration`), y
+> `bills-service` solo manda credenciales si recibe las variables de entorno. Los
+> ejercicios 1 a 13 y el `docker compose` funcionan igual que antes.
+
+### Parte A · Basic y dos papeles
+
+1. Lee `infra/config-server/.../SecurityConfiguration.java` y
+   `application-secure.properties`. ¿Qué puede hacer el usuario `config-client` y qué
+   solo puede hacer `config-admin`?
+2. Arranca el servidor con el perfil `secure` **además** del backend:
+
+   ```powershell
+   $env:CONFIG_CLIENT_PASSWORD="clave-cliente"; $env:CONFIG_ADMIN_PASSWORD="clave-admin"; $env:ENCRYPT_KEY="una-clave-larga-del-curso"
+   .\mvnw -pl infra/config-server spring-boot:run "-Dspring-boot.run.profiles=native,secure"
+   ```
+
+3. Comprueba los cuatro casos (en otra consola):
+
+   ```powershell
+   curl.exe -i http://localhost:8889/bills-service/development                                  # 401
+   curl.exe -i -u config-client:clave-cliente http://localhost:8889/bills-service/development   # 200
+   curl.exe -i -u config-client:clave-cliente http://localhost:8889/encrypt -d hola             # 403
+   curl.exe -u config-admin:clave-admin http://localhost:8889/encrypt -d hola                    # 200
+   ```
+
+4. Arranca `bills-service` **sin** credenciales y pide
+   `GET /api/v1/bills/whoami/ana`. ¿Ha fallado algo? Mira la consola.
+5. Para Bills y arráncalo identificándose, en una consola nueva:
+
+   ```powershell
+   $env:CONFIG_CLIENT_USER="config-client"; $env:CONFIG_CLIENT_PASSWORD="clave-cliente"; $env:CONFIG_FAIL_FAST="true"
+   .\mvnw -pl infra/bills-service spring-boot:run
+   ```
+
+6. Repite el paso 5 con una clave equivocada. ¿Qué cambia gracias a `CONFIG_FAIL_FAST`?
+
+**Resultado esperado.** En el paso 4 Bills arranca y responde *"valor local (el
+config-server no ha respondido)"*: el 401 solo aparece como `WARN` en la consola. En el
+paso 5 responde con el rol del Config Server. En el paso 6 no arranca
+(`ConfigClientFailFastException`).
+
+**Pregunta.** ¿Por qué no se pueden poner `spring.cloud.config.username` y `password` en un
+`application-secure.properties` de Bills? *(La importación de `configserver:` se resuelve
+antes de activar los perfiles. Las credenciales de un fichero de perfil se ignoran sin
+avisar, y con `optional:` la aplicación arranca con los valores locales.)*
+
+### Parte B · HTTPS (opcional)
+
+Basic sin TLS manda la clave en Base64, que es texto en claro para cualquiera que mire la red.
+
+1. Genera el certificado del servidor y el almacén de confianza de Bills (comandos en la
+   solución). Quedan en `infra/config-server/tls/`, que está en `.gitignore`.
+2. Arranca el servidor con `native,secure,tls` y comprueba que
+   `http://localhost:8889/actuator/health` ya no responde y `https://...` sí.
+3. Arranca Bills apuntando a `https://localhost:8889`, primero **sin** el almacén de
+   confianza y después con él.
+
+**Resultado esperado.** Sin el almacén de confianza, Bills no arranca (`PKIX path building
+failed`). Con él, responde con el rol remoto.
+
+**Pregunta.** El certificado es autofirmado. ¿Qué cambia en producción? *(Lo firma una CA
+interna o pública y el almacén de confianza contiene esa CA, no cada certificado. El
+siguiente paso es mTLS: el servidor también pide certificado al cliente y sobra la
+contraseña.)*
+
+Solución: [`soluciones/Ejercicio14ConfigSegura.md`](soluciones/Ejercicio14ConfigSegura.md)

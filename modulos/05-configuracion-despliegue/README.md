@@ -15,7 +15,7 @@ Guion docente. Duración estimada: **tres sesiones de 110 minutos**.
 | Documento | Qué contiene |
 |---|---|
 | [`guion-configurabilidad.md`](guion-configurabilidad.md) | Las tres sesiones completas: Config Server, Eureka, Boot Admin y Docker, con comandos, variante con backend Git y alternativa sin Docker |
-| [`ejercicios.md`](ejercicios.md) | Ejercicios de perfiles, configuración tipada, observabilidad y contenedores |
+| [`ejercicios.md`](ejercicios.md) | Ejercicios de perfiles, configuración tipada, observabilidad y contenedores. El 14 (opcional) protege el Config Server con Basic y HTTPS |
 
 ## Objetivos
 
