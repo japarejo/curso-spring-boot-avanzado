@@ -87,7 +87,7 @@ public class SecurityConfiguration {
 				// queda abierta para poder explorarla con curl y con Swagger UI durante
 				// los modulos 1 y 2.
 				.requestMatchers(HttpMethod.DELETE,"/api/pets/*").permitAll()
-				.requestMatchers("/api/**").authenticated()
+				.requestMatchers("/api/**").permitAll()
 				.requestMatchers("/data-api/**").permitAll()
 
 				// Regla final restrictiva: lo que no se ha permitido explicitamente,
