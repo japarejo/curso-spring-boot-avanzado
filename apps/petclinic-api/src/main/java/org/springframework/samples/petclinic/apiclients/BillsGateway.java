@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 
 /**
  * MODULO 2 - Consumo de APIs REST: las tres opciones, una al lado de otra.
@@ -78,15 +79,37 @@ public class BillsGateway {
 
 	/** Estilo recomendado hoy en aplicaciones sincronas. */
 	@CircuitBreaker(name = "bills", fallbackMethod = "sinFacturas")
-	public List<Bill> conRestClient() {		
+	public List<Bill> conRestClient() {
+		return pedirFacturasConRestClient();
+	}
 
+	/**
+	 * MODULO 5 - Reintento + cortocircuito sobre una llamada HTTP real.
+	 *
+	 * Orden por defecto de los aspectos de resilience4j (de fuera a dentro):
+	 *     Retry( CircuitBreaker( RateLimiter( TimeLimiter( Bulkhead( metodo )))))
+	 * Cada reintento pasa por el cortocircuito y cuenta en sus estadisticas.
+	 *
+	 * Por eso el fallback va en @Retry (el exterior) y NO en @CircuitBreaker:
+	 * si el cortocircuito tuviera fallback, se tragaria la excepcion y el
+	 * reintento nunca llegaria a verla. Y por eso la instancia "bills" de retry
+	 * ignora CallNotPermittedException: con el circuito abierto no tiene
+	 * sentido insistir.
+	 *
+	 * Politica en application.properties: resilience4j.retry.instances.bills.*
+	 */
+	@Retry(name = "bills", fallbackMethod = "sinFacturas")
+	@CircuitBreaker(name = "bills")
+	public List<Bill> conRestClientYReintentos() {
+		return pedirFacturasConRestClient();
+	}
+
+	private List<Bill> pedirFacturasConRestClient() {
 		return restClient.get()
-			.uri("/api/v1/bills")			
-			.retrieve()			
+			.uri("/api/v1/bills")
+			.retrieve()
 			.body(new ParameterizedTypeReference<List<Bill>>() {
 			});
-
-
 	}
 
 	/** Estilo declarativo: el codigo de negocio no ve HTTP. */

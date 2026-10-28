@@ -24,7 +24,7 @@
             aplicaciones no embebidos"): este mismo artefacto se puede ejecutar con
             `java -jar` o desplegar en un Tomcat externo.
     -->
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <properties>
         <finalName>petclinic-api</finalName>
@@ -117,11 +117,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-rest</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-data-rest</artifactId>
-            <version>1.6.14</version>
-        </dependency>
+        <!-- NO anadir springdoc-openapi-data-rest: es de springdoc 1.x (Spring Boot 2).
+             En springdoc 2.x el soporte de Spring Data REST ya viene en el starter y
+             se activa solo al detectar spring-boot-starter-data-rest. La version 1.x
+             mezcla clases incompatibles con la 2.x: empaquetado como war, la
+             aplicacion no arranca (NoSuchMethodError en AbstractSwaggerWelcome). -->
         <!-- Explorador HAL en /data-api: es a Spring Data REST lo que Swagger UI a los controladores -->
         <dependency>
             <groupId>org.springframework.data</groupId>

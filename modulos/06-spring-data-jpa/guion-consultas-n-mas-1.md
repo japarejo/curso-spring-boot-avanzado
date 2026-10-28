@@ -43,18 +43,26 @@ Ver que una consulta aparentemente sencilla se convierte en `1 + N` consultas al
 
 ### Pasos
 
-1. Cambia en `OwnerRepository` la consulta de `findByLastName` a:
+1. En `OwnerRepository`, **comenta la linea `@EntityGraph`** de `findByLastName`, de modo
+   que quede la consulta sin plan de carga:
 
 ```java
+//@EntityGraph(attributePaths = "pets")
 @Query("SELECT owner FROM Owner owner WHERE owner.lastName LIKE :lastName%")
 public Collection<Owner> findByLastName(@Param("lastName") String lastName);
 ```
 
-2. Arranca la aplicacion.
-3. Abre:
+2. Arranca la aplicacion con el perfil `nplus1` (reactiva `open-in-view`; sin el, la
+   misma pagina falla con `LazyInitializationException`):
+
+```powershell
+.\mvnw.cmd -pl apps/petclinic-api spring-boot:run -Dspring-boot.run.profiles=nplus1
+```
+
+3. Inicia sesion (por ejemplo `admin1` / `4dm1n`) y abre:
 
 ```text
-http://localhost:8080/owners
+http://localhost:8080/owners?lastName=
 ```
 
 4. Observa el log SQL.

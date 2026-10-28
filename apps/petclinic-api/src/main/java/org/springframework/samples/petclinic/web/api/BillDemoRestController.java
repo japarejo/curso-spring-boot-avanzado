@@ -54,6 +54,13 @@ public class BillDemoRestController {
 		return billsGateway.conRestClient();
 	}
 
+	@GetMapping("/rest-client-reintentos")
+	@Operation(summary = "RestClient protegido con @Retry y @CircuitBreaker (modulo 5)",
+		description = "Con bills-service parado se ve en el log cada reintento y la espera aplicada antes de devolver lista vacia.")
+	public List<Bill> conRestClientYReintentos() {
+		return billsGateway.conRestClientYReintentos();
+	}
+
 	@GetMapping("/feign")
 	@Operation(summary = "Consume el servicio de facturas con un cliente declarativo Feign",
 		description = "Reenvia la cabecera Authorization. En Swagger UI se rellena con el boton Authorize.",
