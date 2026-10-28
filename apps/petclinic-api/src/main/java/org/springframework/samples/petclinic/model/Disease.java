@@ -4,6 +4,7 @@ import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
@@ -34,5 +35,6 @@ public class Disease extends NamedEntity{
 	
 	@NotEmpty
 	@ManyToMany
+	@JoinTable (name = "diseases_pettypes")
 	Set<PetType> petTypeswithPrevalence;
 }

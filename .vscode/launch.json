@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "BillsServiceApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.bills.BillsServiceApplication",
+            "projectName": "bills-service"
+        },
+        {
+            "type": "java",
             "name": "AdminServerApplication",
             "request": "launch",
             "mainClass": "org.springframework.samples.petclinic.admin.AdminServerApplication",

@@ -44,8 +44,9 @@ class AltaGitHubMySqlContainerIT extends MySqlTestContainerSupport {
 
 	@Test
 	void flywayCreaLaTablaYElAltaFuncionaEnMySql() {
-		assertThat(jdbc.queryForObject("select max(version) from flyway_schema_history", String.class))
-			.isEqualTo("3");
+		// V3 crea github_accounts. No se comprueba que sea la ultima: habra mas migraciones.
+		assertThat(jdbc.queryForObject("select count(*) from flyway_schema_history where version = '3' and success",
+				Integer.class)).isEqualTo(1);
 
 		OAuth2User nuevo = entrarComo(9001, "persona-mysql");
 		assertThat(nuevo.getName()).isEqualTo("gh-persona-mysql");

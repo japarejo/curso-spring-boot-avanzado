@@ -49,6 +49,11 @@ public interface PetRepository extends Repository<Pet, Integer>, JpaSpecificatio
 	 */
 	Pet findById(int id) throws DataAccessException;
 
+
+	Pet findByAge(int age);
+
+	List<Pet> findByOwnerFirstName(String name);
+
 	/**
 	 * Save a <code>Pet</code> to the data store, either inserting or updating it.
 	 * @param pet the <code>Pet</code> to save
