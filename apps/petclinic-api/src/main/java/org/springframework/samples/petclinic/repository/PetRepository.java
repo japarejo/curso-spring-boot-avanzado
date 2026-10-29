@@ -25,6 +25,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
+import org.springframework.samples.petclinic.repository.criteria.BusquedaMascotasRepository;
 
 /**
  * Spring Data JPA specialization of the {@link PetRepository} interface
@@ -32,7 +33,8 @@ import org.springframework.samples.petclinic.model.PetType;
  * @author Michael Isvy
  * @since 15.1.2013
  */
-public interface PetRepository extends Repository<Pet, Integer>, JpaSpecificationExecutor<Pet> {
+public interface PetRepository extends Repository<Pet, Integer>, JpaSpecificationExecutor<Pet>,
+		BusquedaMascotasRepository {
 
 	/**
 	 * Retrieve all <code>PetType</code>s from the data store.

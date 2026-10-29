@@ -56,9 +56,12 @@ class ExternalApiRestAssuredTests {
 			assumeTrue(response.statusCode() == 200, "External API returned HTTP " + response.statusCode());
 			return response;
 		}
-		catch (RuntimeException ex) {
-			assumeTrue(false, "External API is not available: " + ex.getMessage());
-			throw ex;
+		// Exception y no RuntimeException: RestAssured lanza los fallos de red
+		// (SocketTimeoutException, UnknownHostException...) como excepciones
+		// comprobadas sin declararlas, y un catch de RuntimeException no las ve.
+		catch (Exception ex) {
+			assumeTrue(false, "External API is not available: " + ex);
+			throw new IllegalStateException(ex);
 		}
 	}
 

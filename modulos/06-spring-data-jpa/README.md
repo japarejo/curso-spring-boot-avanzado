@@ -20,6 +20,7 @@ tres sesiones del módulo siguen siendo tres:
 | Documento | Qué contiene | Código |
 |---|---|---|
 | [`laboratorio-criteria-api.md`](laboratorio-criteria-api.md) | Metamodelo estático, fragmentos de repositorio, agregación, subconsultas correlacionadas, `HAVING`, paginación dinámica. 6 ejercicios | `repository/criteria/`, 13 pruebas |
+| [`escenario-busqueda-avanzada-criteria.md`](escenario-busqueda-avanzada-criteria.md) | Por qué y cuándo la Criteria API: pantalla de búsqueda con 13 criterios opcionales, proyección con agregados, orden dinámico y paginación. Maqueta funcional en `/resources/busqueda-mascotas.html`. 6 ejercicios | `BusquedaMascotasRepositoryImpl`, 20 pruebas |
 | [`laboratorio-transacciones-avanzadas.md`](laboratorio-transacciones-avanzadas.md) | Autoinvocación, actualización perdida, bloqueo optimista y pesimista, `NESTED`, eventos ligados a la transacción. 14 ejercicios | `service/transacciones/`, 12 pruebas |
 
 Si hay hueco en clase, los cuatro trozos más rentables son el apartado del metamodelo (20 min),

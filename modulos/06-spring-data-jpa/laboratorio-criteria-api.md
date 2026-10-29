@@ -6,6 +6,10 @@
 > casa. Si hay que tocarlo en clase, con el apartado 1 y el ejercicio 1 (unos 20 minutos)
 > queda plantado el concepto.
 
+> **Para justificarlo con un caso real**, el
+> [escenario de búsqueda avanzada de pacientes](escenario-busqueda-avanzada-criteria.md) aplica
+> estas piezas a una pantalla con 13 filtros opcionales, con maqueta funcional incluida.
+
 ## Por qué existe este laboratorio
 
 En el módulo 6 aparecen tres formas de consultar con Spring Data:
