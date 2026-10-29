@@ -2,8 +2,12 @@
 target/
 build/
 
-# El wrapper de Maven SI se versiona (mvnw, mvnw.cmd y .mvn/wrapper/*),
-# para que clonar el repo y ejecutar ./mvnw funcione sin Maven instalado.
+# Binarios: no se versionan. Tampoco el maven-wrapper.jar: mvnw y mvnw.cmd
+# lo descargan solos la primera vez (wrapperUrl en .mvn/wrapper/maven-wrapper.properties).
+# Si se versionan los scripts mvnw, mvnw.cmd y maven-wrapper.properties, para
+# que clonar el repo y ejecutar ./mvnw funcione sin Maven instalado.
+*.jar
+*.war
 
 # --- Logs ---
 *.log

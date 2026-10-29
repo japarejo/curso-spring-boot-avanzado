@@ -95,7 +95,7 @@ public class OwnerService {
 		return ownerRepository.findByLastName(lastName);
 	}
 
-	@Transactional
+	@Transactional(rollbackFor={RuntimeException.class, DataAccessException.class})
 	public void saveOwner(Owner owner) throws DataAccessException {
 		//creating owner
 		ownerRepository.save(owner);		

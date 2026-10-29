@@ -86,12 +86,12 @@ public class EntitiesTest {
 
 	@Test 
 	public void miPrueba5(){
-		Pet p=petRepository.findByAge(14);
+		/*Pet p=petRepository.findByAge(14);
 		System.out.println("Pet: "+p +" id:"+p.getId());
 		System.out.println("Pet: "+p.getName() +" id:"+p.getId());
 		System.out.println("Pet: "+p.getType() +" id:"+p.getId());
 		System.out.println("Pet: "+p.getBirthDate() +" id:"+p.getId());
-		System.out.println("Pet: "+p.getOwner() +" id:"+p.getId());
+		System.out.println("Pet: "+p.getOwner() +" id:"+p.getId()); */
 
 
 		System.out.println("Voy a buscar mascotas de Betty");
@@ -103,6 +103,7 @@ public class EntitiesTest {
 			System.out.println("Pet: "+pe.getType() +" id:"+pe.getId());
 			System.out.println("Pet: "+pe.getBirthDate() +" id:"+pe.getId());
 			System.out.println("Pet: "+pe.getOwner() +" id:"+pe.getId());		
+			System.out.println("Pet visits: "+pe.getVisits().size());		
 		}
 	}
 }

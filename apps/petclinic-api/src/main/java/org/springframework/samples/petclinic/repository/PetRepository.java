@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
@@ -54,6 +55,7 @@ public interface PetRepository extends Repository<Pet, Integer>, JpaSpecificatio
 
 	Pet findByAge(int age);
 
+	@EntityGraph(attributePaths ={"visits","owner","type"} )
 	List<Pet> findByOwnerFirstName(String name);
 
 	/**

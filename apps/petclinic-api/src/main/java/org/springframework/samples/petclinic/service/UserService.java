@@ -20,8 +20,10 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.samples.petclinic.model.User;
 import org.springframework.samples.petclinic.repository.UserRepository;
+import org.springframework.samples.petclinic.service.exceptions.DuplicatedPetNameException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,8 @@ public class UserService {
 
 	@Transactional
 	public void saveUser(User user) throws DataAccessException {
+		if(user.getUsername().equals("ROLLBACK"))
+			throw new DataAccessResourceFailureException("Could not save user");
 		user.setEnabled(true);
 		userRepository.save(user);
 	}
