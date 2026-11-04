@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.samples.petclinic.aop.Auditado;
+import org.springframework.samples.petclinic.aop.Cronometrado;
 import org.springframework.samples.petclinic.model.Visit;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 import org.springframework.samples.petclinic.repository.VisitSpecification;
@@ -18,6 +19,7 @@ import jakarta.validation.Valid;
 
 @Service
 @Validated
+@Cronometrado(umbralMs = 200)
 public class VisitService {
 
 	

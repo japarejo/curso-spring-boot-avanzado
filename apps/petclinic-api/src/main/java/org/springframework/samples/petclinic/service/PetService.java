@@ -21,6 +21,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.samples.petclinic.aop.Auditado;
+import org.springframework.samples.petclinic.aop.Cronometrado;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
 import org.springframework.samples.petclinic.model.Visit;
@@ -116,6 +117,7 @@ public class PetService {
 	 *                         when false the guard is omitted and the LEFT JOIN
 	 *                         behaves as an effective INNER JOIN
 	 */
+	@Cronometrado(umbralMs = 50)
 	@Transactional(readOnly = true)
 	public List<Pet> searchPetsWithVisits(String petName, String ownerLastName,
 			String visitDescription, boolean trueLeftJoin) {
