@@ -460,3 +460,103 @@ Spring Boot? *(La 4: casi todo lo que hace Spring Boot por ti es un `@Conditiona
 Compruébalo con `/actuator/conditions`.)*
 
 Solución: [`soluciones/Ejercicio10VariasImplementaciones.java`](soluciones/Ejercicio10VariasImplementaciones.java)
+
+---
+
+## Ejercicio 11 · Un aspecto que se activa con una anotación propia
+
+**Objetivo.** Aplicar un aspecto solo donde se pone una anotación inventada por nosotros,
+igual que hace Spring con `@Transactional`, `@PreAuthorize` o `@Retry`.
+**Diapositiva:** 26. **Tiempo:** 40 min. **Requisito:** ejercicio 9.
+
+### Parte A · Leer el ejemplo `@Auditado` (10 min)
+
+En `apps/petclinic-api` ya hay un aspecto completo en el paquete `aop/`:
+
+| Fichero | Qué hace |
+|---|---|
+| `Auditado.java` | La anotación: `@Auditado("alta de visita")`, con `conArgumentos = false` para no guardar datos sensibles |
+| `AuditoriaAspect.java` | `@Around("@annotation(auditado)")`: registra usuario, argumentos, duración y resultado |
+| `RegistroAuditoria.java`, `EntradaAuditoria.java` | Dónde se guarda (en memoria, para las pruebas) |
+| `test/.../aop/AuditoriaAspectTests.java` | Siete pruebas: caso correcto, excepción, argumentos ocultos, autoinvocación, acceso denegado... |
+
+Está aplicado a `VisitService.create`, `PetService.savePet` y `PetService.deletePet`.
+
+1. Fíjate en el punto de corte. `@annotation(auditado)` va en minúscula: es el **nombre del
+   parámetro** del método, no la clase. Así Spring, además de filtrar, pasa la anotación ya
+   leída y se puede usar `auditado.value()`.
+2. Arranca la aplicación y, **sin iniciar sesión**:
+   **Swagger UI** → *Pets* → `DELETE /api/pets/{id}` → `id` = `1` → **Execute**.
+
+   <details><summary>Equivalente en <code>curl</code></summary>
+
+   ```bash
+   curl -i -X DELETE http://localhost:8080/api/pets/1
+   ```
+
+   </details>
+
+   La petición se rechaza, pero en la consola aparece:
+
+   ```text
+   AUDITORIA borrado de mascota | PetService.deletePet(..) | usuario=anonimo | args=[1] | ERROR AuthorizationDeniedException | 5 ms
+   ```
+
+   **Pregunta.** Si `@PreAuthorize` rechaza la llamada, ¿por qué llega a auditarse? Lee el
+   comentario sobre el orden en `AuditoriaAspect`.
+3. Ejecuta las pruebas:
+
+   ```bash
+   ./mvnw -pl apps/petclinic-api test -Dtest=AuditoriaAspectTests
+   ```
+
+4. Rompe el ejemplo de dos maneras, de una en una, y vuelve a ejecutar las pruebas:
+   1. Quita `@Retention(RetentionPolicy.RUNTIME)` de `Auditado`.
+   2. Cambia el orden del aspecto a `@Order(Ordered.HIGHEST_PRECEDENCE)`.
+
+   Anota qué falla y por qué. Deshaz los cambios.
+
+### Parte B · Tu anotación: `@Cronometrado` (30 min)
+
+Queremos un aviso en el registro solo cuando un método tarde más de lo razonable.
+
+1. Crea en `aop/` la anotación `@Cronometrado(umbralMs = 500)`. Debe poder ponerse en un
+   **método** o en una **clase** (`@Target`), y ser visible en ejecución.
+2. Crea `CronometradoAspect`. Mide la llamada y escribe:
+   - `WARN  LENTO PetService.searchPetsWithVisits(..) tardo 812 ms (umbral 50 ms)` si llega
+     al umbral,
+   - una línea `DEBUG` en caso contrario.
+3. Aplícala en dos niveles:
+   - en la **clase** `VisitService`, con `umbralMs = 200`;
+   - en el **método** `PetService.searchPetsWithVisits`, con `umbralMs = 50`.
+
+   Si una clase anotada tiene un método anotado, **manda la del método**, y la llamada se
+   mide **una sola vez**.
+
+   > **Pista.** `@annotation(x)` solo mira el método. Para la anotación de la clase hace
+   > falta `@within(x)`. Lo más limpio son dos consejos que llamen al mismo método privado,
+   > con cuidado de que no coincidan los dos sobre la misma llamada.
+
+4. Escribe `CronometradoAspectTests` copiando el esquema de `AuditoriaAspectTests`: un
+   servicio de prueba con la anotación en la clase y en algún método, y
+   `OutputCaptureExtension` para comprobar qué se escribió. Con `umbralMs = 0` el aviso sale
+   siempre, y con `Thread.sleep` se fuerza un método lento.
+5. **El orden.** `VisitService.create` queda ahora con tres aspectos: `@Auditado`,
+   `@Cronometrado` y `@Transactional`. Pon a `CronometradoAspect`
+   `@Order(AuditoriaAspect.ORDEN + 1)` y responde:
+   - ¿El tiempo medido incluye lo que tarda la auditoría?
+   - ¿Incluye abrir la transacción y hacer *commit*?
+   - ¿Qué pasa si no pones `@Order`?
+6. **La trampa.** Pon `@Cronometrado(umbralMs = 0)` en un método `private` y llámalo desde un
+   método público del mismo servicio. ¿Sale el aviso? ¿Avisa Spring de algo?
+
+**Resultado esperado.** Las búsquedas lentas dejan un `WARN` con su umbral, y las rápidas no
+dejan nada en el nivel `INFO`. La anotación del método sustituye a la de la clase, sin
+duplicar la línea. El método privado no se mide, y Spring no avisa de ello.
+
+**Pregunta.** ¿Qué tienen en común `@Auditado`, `@Cronometrado`, `@Transactional`,
+`@PreAuthorize`, `@Cacheable` y `@Retry`? *(Todas son metadatos sin comportamiento propio.
+Un aspecto (en Spring, un *advisor*) busca la anotación y envuelve el método en el proxy. Por
+eso todas comparten las mismas limitaciones y el orden entre ellas importa.)*
+
+Solución: [`soluciones/Ejercicio11AnotacionPersonalizada.java`](soluciones/Ejercicio11AnotacionPersonalizada.java)

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.aop.Auditado;
 import org.springframework.samples.petclinic.model.Visit;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 import org.springframework.samples.petclinic.repository.VisitSpecification;
@@ -23,6 +24,7 @@ public class VisitService {
 	@Autowired
 	VisitRepository visitRepository;
 
+	@Auditado("alta de visita")
 	@Transactional
 	public Visit create(@Valid Visit visit) {
 		visitRepository.save(visit);

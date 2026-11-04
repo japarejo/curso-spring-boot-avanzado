@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.samples.petclinic.aop.Auditado;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
 import org.springframework.samples.petclinic.model.Visit;
@@ -75,6 +76,7 @@ public class PetService {
 		return petRepository.findById(id);
 	}
 
+	@Auditado("alta o modificacion de mascota")
 	@Transactional(rollbackFor = DuplicatedPetNameException.class)
 	public void savePet(Pet pet) throws DataAccessException, DuplicatedPetNameException {
 		if (pet.getOwner() != null && StringUtils.hasLength(pet.getName())) {
@@ -91,6 +93,7 @@ public class PetService {
 		return visitRepository.findByPetId(petId);
 	}
 
+	@Auditado("borrado de mascota")
 	@PreAuthorize ("hasAuthority('admin') or hasAuthority('owner')")
 	@PostAuthorize ("returnObject.owner.user.username == authentication.name or hasAuthority('admin')")
 	public Pet deletePet(int id) {

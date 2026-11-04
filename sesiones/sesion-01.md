@@ -234,6 +234,7 @@ y déjala para la próxima sesión.
   - Ejercicio 7 (importar el BOM en `tareas`).
   - Ejercicio 8, pasos 3–5 (Actuator propio).
   - Ejercicio 9, pasos 3–5 (aspecto que mide tiempos).
+  - Ejercicio 11 (aspecto con anotación propia: leer `@Auditado` y escribir `@Cronometrado`).
 
 ---
 
