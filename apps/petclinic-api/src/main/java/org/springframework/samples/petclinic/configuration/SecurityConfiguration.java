@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.configuration;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -141,12 +142,13 @@ public class SecurityConfiguration {
 
 	// 3. CIFRADO DE CONTRASENAS ------------------------------------------------
 	@Bean
-	PasswordEncoder passwordEncoder() {
+	PasswordEncoder passwordEncoder(@Value("${password.encoder.strength}")int strength) {
 		// Codificador delegado: elige el algoritmo segun el prefijo almacenado
 		// en la propia contrasena ({bcrypt}..., {noop}..., {pbkdf2}...).
 		// Ventaja sobre `new BCryptPasswordEncoder()`: permite migrar de algoritmo
 		// sin invalidar las contrasenas ya guardadas.
 		// Ver los INSERT de src/main/resources/data.sql.
+		System.out.println("PasswordEncoder strength: " + strength);
 		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
 	}
 }

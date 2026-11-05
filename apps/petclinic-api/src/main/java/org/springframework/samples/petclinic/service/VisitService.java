@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.aop.Cronometrado;
 import org.springframework.samples.petclinic.model.Visit;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 import org.springframework.samples.petclinic.repository.VisitSpecification;
+import org.springframework.samples.petclinic.service.notificaciones.RecordatorioService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -26,10 +27,14 @@ public class VisitService {
 	@Autowired
 	VisitRepository visitRepository;
 
+	@Autowired 
+	RecordatorioService recordatorioService;
+
 	@Auditado("alta de visita")
 	@Transactional
-	public Visit create(@Valid Visit visit) {
-		visitRepository.save(visit);
+	public Visit create(Visit visit) {
+		recordatorioService.enviarRecordatorio(visit);
+		visitRepository.save(visit);		
 		return visit;
 	}
 
