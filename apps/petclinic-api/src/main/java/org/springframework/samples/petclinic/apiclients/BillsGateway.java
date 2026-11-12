@@ -1,132 +1,77 @@
 package org.springframework.samples.petclinic.apiclients;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.samples.petclinic.configuration.BillsProperties;
+import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.model.Bill;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
-
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 
 /**
- * MODULO 2 - Consumo de APIs REST: las tres opciones, una al lado de otra.
+ * MODULO 2 - Consumo de APIs REST: contrato comun de la pasarela de facturas.
  *
- * Esta clase es una PASARELA hacia un servicio externo, no un servicio de
- * dominio, y por eso esta anotada con @Component y vive junto a los clientes.
- * No es un detalle cosmetico: las rebanadas @DataJpaTest del modulo 4 incluyen
- * los beans @Service con
+ * Antes esta clase mezclaba los tres clientes HTTP y solo sabia hacer GET.
+ * Ahora es un CONTRATO (el que ve el codigo de negocio) y hay una
+ * implementacion por cada tecnologia, para poder compararlas lado a lado
+ * haciendo exactamente las mismas operaciones:
+ *
+ *   BillsRestTemplateGateway  estilo clasico (modo mantenimiento desde Spring 5).
+ *   BillsRestClientGateway    recomendado desde Spring Framework 6.1 (sincrono).
+ *   BillsFeignGateway         cliente declarativo sobre la interfaz BillClient.
+ *
+ * Operaciones (verbo HTTP -> metodo):
+ *   GET    /api/v1/bills          -> findAll
+ *   GET    /api/v1/bills/{id}     -> findById
+ *   HEAD   /api/v1/bills/{id}     -> exists
+ *   POST   /api/v1/bills          -> create   (devuelve ResponseEntity: estado + Location)
+ *   PUT    /api/v1/bills/{id}     -> update   (reemplazo completo)
+ *   PATCH  /api/v1/bills/{id}     -> patch    (modificacion parcial)
+ *   DELETE /api/v1/bills/{id}     -> delete
+ *
+ * Todas las operaciones reciben la cabecera Authorization (puede ser vacia).
+ * Feign la necesita explicita; en los otros dos se reenvia solo si no esta
+ * en blanco, para que el contrato sea el mismo en los tres.
+ *
+ * Es una pasarela hacia un servicio externo, no un servicio de dominio: las
+ * implementaciones son @Component y NO @Service. Las rebanadas @DataJpaTest del
+ * modulo 4 incluyen los beans @Service con
  *     @DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
- * y si esta clase fuera @Service, cada prueba de persistencia intentaria
- * levantar tambien los clientes HTTP. Una rebanada debe cargar solo lo suyo.
+ * y, si fueran @Service, cada prueba de persistencia intentaria levantar
+ * tambien los clientes HTTP. Una rebanada debe cargar solo lo suyo.
  *
- *   conRestTemplate  estilo clasico. RestTemplate esta en modo mantenimiento
- *                    desde Spring 5: no recibe funcionalidad nueva.
- *   conRestClient    opcion recomendada desde Spring Framework 6.1 en
- *                    aplicaciones sincronas. Misma API fluida que WebClient
- *                    pero sin arrastrar el modelo reactivo.
- *   conFeign         cliente declarativo: se declara la interfaz y el
- *                    framework genera la implementacion.
- *
- * Los tres atacan el mismo endpoint. En clase se ejecutan contra
- * /api/v1/bills-demo y se comparan legibilidad y trazas.
- *
- * Todos los metodos llevan cortocircuito: si el servicio de facturas esta
- * caido, se devuelve lista vacia en lugar de propagar el fallo.
+ * Resiliencia: las lecturas llevan cortocircuito con fallback (lista vacia /
+ * Optional vacio / false). Las escrituras NO tienen fallback a proposito:
+ * devolver "todo bien" ante un POST o DELETE que no se ha ejecutado seria
+ * mentir al llamante. Un fallo de escritura se propaga como excepcion.
+ * Tampoco se reintentan: POST y PATCH no son idempotentes y repetirlos podria
+ * duplicar o aplicar dos veces el cambio. El reintento solo se demuestra sobre
+ * la lectura (BillsRestClientGateway.findAllConReintentos).
  */
-@Component
-public class BillsGateway {
+public interface BillsGateway {
 
-	private static final Logger log = LoggerFactory.getLogger(BillsGateway.class);
+	/** Nombre de la instancia de resilience4j (application.properties). */
+	String RESILIENCE_INSTANCE = "bills";
 
-	private final BillsProperties properties;
-	private final BillClient billClient;
-	private final RestClient restClient;
-	private final RestTemplate restTemplate;
+	/** Ruta base del recurso en bills-service. */
+	String BILLS_PATH = "/api/v1/bills";
 
-	public BillsGateway(BillsProperties properties, BillClient billClient,
-			RestClient.Builder restClientBuilder, RestTemplateBuilder restTemplateBuilder) {
-		this.properties = properties;
-		this.billClient = billClient;
-		// Los builders que inyecta Spring Boot ya traen aplicados los
-		// conversores de mensajes y los interceptores registrados en el contexto.
-		// Crear `new RestTemplate()` a mano, como hacia el codigo anterior,
-		// se salta toda esa configuracion.
-		this.restClient = restClientBuilder
-			.baseUrl(properties.baseUrl())
-			.build();
-		
-		
-		this.restTemplate = restTemplateBuilder
-			.connectTimeout(properties.connectTimeout())
-			.readTimeout(properties.readTimeout())
-			.build();
-	}
+	List<Bill> findAll(String authorization);
 
-	/** Estilo clasico, mantenido aqui solo para poder compararlo. */
-	@CircuitBreaker(name = "bills", fallbackMethod = "sinFacturas")
-	public List<Bill> conRestTemplate() {
-		Bill[] bills = restTemplate.getForObject(properties.baseUrl() + "/api/v1/bills", Bill[].class);
-		return bills == null ? List.of() : Arrays.asList(bills);
-	}
+	/** Vacio si la factura no existe (404) o el servicio no responde. */
+	java.util.Optional<Bill> findById(Integer id, String authorization);
 
-	/** Estilo recomendado hoy en aplicaciones sincronas. */
-	@CircuitBreaker(name = "bills", fallbackMethod = "sinFacturas")
-	public List<Bill> conRestClient() {
-		return pedirFacturasConRestClient();
-	}
+	/** HEAD: comprueba la existencia sin descargar el cuerpo. */
+	boolean exists(Integer id, String authorization);
 
-	/**
-	 * MODULO 5 - Reintento + cortocircuito sobre una llamada HTTP real.
-	 *
-	 * Orden por defecto de los aspectos de resilience4j (de fuera a dentro):
-	 *     Retry( CircuitBreaker( RateLimiter( TimeLimiter( Bulkhead( metodo )))))
-	 * Cada reintento pasa por el cortocircuito y cuenta en sus estadisticas.
-	 *
-	 * Por eso el fallback va en @Retry (el exterior) y NO en @CircuitBreaker:
-	 * si el cortocircuito tuviera fallback, se tragaria la excepcion y el
-	 * reintento nunca llegaria a verla. Y por eso la instancia "bills" de retry
-	 * ignora CallNotPermittedException: con el circuito abierto no tiene
-	 * sentido insistir.
-	 *
-	 * Politica en application.properties: resilience4j.retry.instances.bills.*
-	 */
-	@Retry(name = "bills", fallbackMethod = "sinFacturas")
-	@CircuitBreaker(name = "bills")
-	public List<Bill> conRestClientYReintentos() {
-		return pedirFacturasConRestClient();
-	}
+	/** POST: 201 Created con la factura creada y su cabecera Location. */
+	ResponseEntity<Bill> create(Bill bill, String authorization);
 
-	private List<Bill> pedirFacturasConRestClient() {
-		return restClient.get()
-			.uri("/api/v1/bills")
-			.retrieve()
-			.body(new ParameterizedTypeReference<List<Bill>>() {
-			});
-	}
+	/** PUT: reemplaza la factura completa. Idempotente. */
+	Bill update(Integer id, Bill bill, String authorization);
 
-	/** Estilo declarativo: el codigo de negocio no ve HTTP. */
-	@CircuitBreaker(name = "bills", fallbackMethod = "sinFacturasConToken")
-	public List<Bill> conFeign(String authorizationHeader) {
-		return billClient.getBills(authorizationHeader);
-	}
+	/** PATCH: cambia solo los campos enviados, p. ej. Map.of("amount", 12.5). */
+	Bill patch(Integer id, Map<String, Object> changes, String authorization);
 
-	// --- Metodos de reserva del cortocircuito --------------------------------
-	// La firma debe coincidir con la del metodo protegido mas el Throwable final.
+	/** DELETE: elimina la factura. Idempotente. */
+	void delete(Integer id, String authorization);
 
-	List<Bill> sinFacturas(Throwable t) {
-		log.warn("El servicio de facturas no responde ({}). Se devuelve lista vacia.", t.toString());
-		return List.of();
-	}
-
-	List<Bill> sinFacturasConToken(String authorizationHeader, Throwable t) {
-		return sinFacturas(t);
-	}
 }

@@ -2,9 +2,10 @@ package org.springframework.samples.petclinic.service.notificaciones;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.samples.petclinic.model.Visit;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+// @Service por el mismo motivo que NotificadorCitasEmail (rebanadas @DataJpaTest).
+@Service
 @Profile("tel")
 public class NotificadorCitasSMS implements NotificadorCitas {
 

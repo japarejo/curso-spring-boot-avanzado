@@ -18,6 +18,7 @@ import org.springframework.samples.petclinic.model.PetType;
 import org.springframework.samples.petclinic.model.Vet;
 import org.springframework.samples.petclinic.model.Visit;
 import org.springframework.samples.petclinic.repository.VisitRepository;
+import org.springframework.samples.petclinic.service.notificaciones.RecordatorioService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
@@ -82,6 +83,12 @@ class VisitServiceTests {
 		@Bean
 		VisitRepository visitRepository() {
 			return mock(VisitRepository.class);
+		}
+
+		// VisitService inyecta un RecordatorioService; aqui basta con un doble.
+		@Bean
+		RecordatorioService recordatorioService() {
+			return mock(RecordatorioService.class);
 		}
 
 		@Bean

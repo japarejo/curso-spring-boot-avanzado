@@ -64,7 +64,7 @@ public class Visit extends BaseEntity {
 	/**
 	 * Optional diagnosis associated with this visit.
 	 */
-	//@JsonIgnore
+	@JsonIgnore
 	@Valid
 	@OneToOne(mappedBy = "visit", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Diagnose diagnose;

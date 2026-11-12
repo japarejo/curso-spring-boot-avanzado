@@ -3,10 +3,12 @@ package org.springframework.samples.petclinic.service.notificaciones;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.samples.petclinic.model.Visit;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-
-@Component 
+// @Service y no @Component: RecordatorioService (@Service) depende de un
+// NotificadorCitas, y las rebanadas @DataJpaTest(includeFilters = Service.class)
+// solo cargan beans @Service. Con @Component el contexto de prueba no arranca.
+@Service
 @Profile("!tel")
 public class NotificadorCitasEmail implements NotificadorCitas {
 

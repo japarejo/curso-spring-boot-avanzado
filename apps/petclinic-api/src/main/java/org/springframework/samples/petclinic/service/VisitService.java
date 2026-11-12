@@ -32,7 +32,7 @@ public class VisitService {
 
 	@Auditado("alta de visita")
 	@Transactional
-	public Visit create(Visit visit) {
+	public Visit create(@Valid Visit visit) {
 		recordatorioService.enviarRecordatorio(visit);
 		visitRepository.save(visit);		
 		return visit;
