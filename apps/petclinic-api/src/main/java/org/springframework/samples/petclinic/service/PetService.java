@@ -30,7 +30,6 @@ import org.springframework.samples.petclinic.repository.PetSpecification;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 import org.springframework.samples.petclinic.service.exceptions.DuplicatedPetNameException;
 import org.springframework.samples.petclinic.web.api.ResourceNotFoundException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,8 +94,10 @@ public class PetService {
 	}
 
 	@Auditado("borrado de mascota")
-	@PreAuthorize ("hasAuthority('admin') or hasAuthority('owner')")
-	@PostAuthorize ("returnObject.owner.user.username == authentication.name or hasAuthority('admin')")
+	// La propiedad se comprueba ANTES de borrar. Con @PostAuthorize el borrado
+	// ya estaba confirmado cuando saltaba la excepcion (ver PetSecurity).
+	@PreAuthorize ("hasAuthority('admin') or ( hasAuthority('owner') and @petSecurity.isOwner(#id, authentication))")
+	@Transactional
 	public Pet deletePet(int id) {
 		Pet pet = petRepository.findById(id);
 		if(pet == null) {
@@ -105,7 +106,7 @@ public class PetService {
 		petRepository.deleteById(id);
 		return pet;
 	}
-
+	
 	/**
 	 * Searches pets using the Criteria API demonstrating LEFT JOIN behaviour.
 	 *

@@ -60,7 +60,7 @@ public class SecurityConfiguration {
 		if (registros.getIfAvailable() != null) {
 			http.oauth2Login(oauth -> oauth
 				.userInfoEndpoint(info -> info.userService(new GitHubOAuth2UserService(altas, users)))
-				.defaultSuccessUrl("/welcome"));
+				.defaultSuccessUrl("/"));
 		}
 
 		http
@@ -87,8 +87,8 @@ public class SecurityConfiguration {
 				// La API REST se securiza en el modulo 3 (ejercicio de JWT). De momento
 				// queda abierta para poder explorarla con curl y con Swagger UI durante
 				// los modulos 1 y 2.
-				.requestMatchers(HttpMethod.DELETE,"/api/pets/*").permitAll()
-				.requestMatchers("/api/**").permitAll()
+				.requestMatchers(HttpMethod.DELETE,"/api/pets/*").hasAnyAuthority("owner","admin")
+				.requestMatchers("/api/**").authenticated()
 				.requestMatchers("/data-api/**").permitAll()
 
 				// Regla final restrictiva: lo que no se ha permitido explicitamente,
@@ -99,7 +99,8 @@ public class SecurityConfiguration {
 			// Spring genera la pagina de login. Es deliberado: el temario no evalua
 			// la vista de login, y asi no hay una JSP mas que mantener.
 			.formLogin(form -> form
-				.defaultSuccessUrl("/welcome")
+				.defaultSuccessUrl("/")
+				.successForwardUrl("/welcome")
 				.permitAll())
 			.logout(logout -> logout
 				.logoutSuccessUrl("/login"))
@@ -142,13 +143,15 @@ public class SecurityConfiguration {
 
 	// 3. CIFRADO DE CONTRASENAS ------------------------------------------------
 	@Bean
-	PasswordEncoder passwordEncoder(@Value("${password.encoder.strength}")int strength) {
+	PasswordEncoder passwordEncoder() {
 		// Codificador delegado: elige el algoritmo segun el prefijo almacenado
 		// en la propia contrasena ({bcrypt}..., {noop}..., {pbkdf2}...).
 		// Ventaja sobre `new BCryptPasswordEncoder()`: permite migrar de algoritmo
 		// sin invalidar las contrasenas ya guardadas.
 		// Ver los INSERT de src/main/resources/data.sql.
-		System.out.println("PasswordEncoder strength: " + strength);
-		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+		
+		PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+		System.out.println("Encoded password: " + passwordEncoder.encode("{bcrypt}JanderClander"));
+		return passwordEncoder;
 	}
 }

@@ -19,7 +19,7 @@ INSERT INTO users(username,password,enabled) VALUES ('owner6','{bcrypt}$2a$10$As
 INSERT INTO authorities(id,version,username,authority) VALUES (6,1,'owner6','owner');
 INSERT INTO users(username,password,enabled) VALUES ('owner7','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (7,1,'owner7','owner');
-INSERT INTO users(username,password,enabled) VALUES ('owner8','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
+INSERT INTO users(username,password,enabled) VALUES ('owner8','{noop}super-secret-pwd',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (8,1,'owner8','owner');
 INSERT INTO users(username,password,enabled) VALUES ('owner9','{bcrypt}$2a$10$AsvJU.GvgyGwcovVRq34cOm0zH5JprJPBwlLqgPpM49MXAPZ2vWjS',TRUE);
 INSERT INTO authorities(id,version,username,authority) VALUES (9,1,'owner9','owner');
