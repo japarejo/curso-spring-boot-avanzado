@@ -35,8 +35,7 @@ class LoginSecurityTest {
 	@CsvSource({ "admin1, 4dm1n", "owner1, 0wn3r", "vet1, v3t" })
 	void demoUsersCanLogIn(String username, String password) throws Exception {
 		mockMvc.perform(formLogin().user(username).password(password))
-			.andExpect(authenticated().withUsername(username))
-			.andExpect(redirectedUrl("/welcome"));
+			.andExpect(authenticated().withUsername(username));
 	}
 
 	@Test

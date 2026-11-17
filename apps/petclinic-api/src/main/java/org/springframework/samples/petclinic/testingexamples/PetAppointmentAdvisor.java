@@ -67,7 +67,7 @@ public class PetAppointmentAdvisor {
 			return false;
 		}
 		String lowerCaseSymptom = symptom.toLowerCase(Locale.ROOT);
-		return lowerCaseSymptom.contains("sangra") || lowerCaseSymptom.contains("no respira")
+		return lowerCaseSymptom.contains("sangr") || lowerCaseSymptom.contains("no respira")
 				|| lowerCaseSymptom.contains("convulsion");
 	}
 

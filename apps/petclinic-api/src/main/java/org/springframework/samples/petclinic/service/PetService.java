@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.petclinic.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -58,7 +59,8 @@ public class PetService {
 
 	@Transactional(readOnly = true)
 	public Collection<Pet> findAllPets() throws DataAccessException {
-		return petRepository.findAll();	}
+		return petRepository.findAll();			
+	}
 
 	
 	@Transactional(readOnly = true)
