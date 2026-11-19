@@ -42,6 +42,7 @@
         <module>infra/bills-service</module>
         <module>extras/acl-service</module>
         <module>extras/oauth2-login-service</module>
+        <module>extras/roles-privilegios-service</module>
 
         <!--
             Las practicas son proyectos independientes (su propio padre y su

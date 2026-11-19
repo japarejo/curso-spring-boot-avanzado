@@ -49,11 +49,11 @@ class OwnerControllerTests {
 	@MockitoBean
 	private OwnerService clinicService;
         
-        @MockitoBean
+    @MockitoBean
 	private UserService userService;
         
-        @MockitoBean
-        private AuthoritiesService authoritiesService; 
+    @MockitoBean
+    private AuthoritiesService authoritiesService; 
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -84,7 +84,7 @@ class OwnerControllerTests {
 	}
 
 	@WithMockUser(value = "spring")
-        @Test
+    @Test
 	void testProcessCreationFormSuccess() throws Exception {
 		mockMvc.perform(post("/owners/new").param("firstName", "Joe").param("lastName", "Bloggs")
 							.with(csrf())

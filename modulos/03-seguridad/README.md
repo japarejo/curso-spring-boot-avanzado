@@ -35,6 +35,7 @@ Guion docente. Duración estimada: **dos sesiones de 120 minutos**.
 | Login con GitHub (OAuth 2) | perfil `github`: `configuration/GitHubOAuth2UserService`, `application-github.properties` (ejercicios 14 a 16) |
 | Alta automática con GitHub | `service/AltaGitHubService`, tabla `github_accounts` (`V3__cuentas_github.sql`) |
 | ACL por instancia (ampliación) | [`guion-acl.md`](guion-acl.md) |
+| Roles, privilegios y jerarquía de roles (ampliación) | [`guion-roles-privilegios.md`](guion-roles-privilegios.md) · `extras/roles-privilegios-service/` |
 
 ---
 

@@ -34,7 +34,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(PetRestController.class)
-@WithMockUser
+@WithMockUser(authorities = {"owner"})
 class PetRestControllerMockMvcTests {
 
 	@Autowired

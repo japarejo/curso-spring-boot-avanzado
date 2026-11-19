@@ -1,6 +1,6 @@
 # Material de ampliación
 
-Dos módulos que no entran en el temario obligatorio pero que responden a
+Tres módulos que no entran en el temario obligatorio pero que responden a
 preguntas que salen prácticamente siempre en el módulo 3.
 
 No son necesarios para seguir el curso: el reactor los compila, pero se pueden
@@ -90,6 +90,32 @@ Las de `application.properties` son **de demostración**, generadas para este
 curso y versionadas a propósito para que el módulo funcione recién clonado.
 Están marcadas con un aviso en el propio fichero y se sobrescriben con
 `JWT_PRIVATE_KEY` y `JWT_PUBLIC_KEY`.
+
+---
+
+## `roles-privilegios-service` — roles, privilegios y jerarquía · puerto 8064
+
+**La pregunta que responde:** *"¿`hasRole` o `hasAuthority`? ¿Qué diferencia
+hay entre un rol y un permiso? Y si el administrador puede hacer todo lo que
+hace un veterinario, ¿escribo `hasAnyRole('VET', 'ADMIN')` en todas partes?"*
+
+Modelo `Usuario → Rol → Privilegio` en base de datos (como en el artículo de
+Baeldung) más una **jerarquía de roles** con `RoleHierarchy`. Muestra también la
+trampa de combinar ambas cosas sin cuidado: la jerarquía no hereda privilegios.
+
+```bash
+./mvnw -pl extras/roles-privilegios-service spring-boot:run
+# http://localhost:8064/swagger-ui.html · usuarios eva, rita, victor, pablo, admin / demo
+```
+
+Guion y ejercicios: [`../modulos/03-seguridad/guion-roles-privilegios.md`](../modulos/03-seguridad/guion-roles-privilegios.md)
+
+| Fichero | Qué muestra |
+|---|---|
+| `configuration/SecurityConfiguration` | Bean `RoleHierarchy` aplicado a rutas y a `@PreAuthorize` |
+| `security/UsuarioDetailsService` | Roles y privilegios convertidos en `GrantedAuthority`, siguiendo la jerarquía |
+| `service/ClinicaService` | `hasRole` frente a `hasAuthority` |
+| `web/YoController` | `GET /api/yo`: autoridades guardadas frente a efectivas |
 
 ---
 
