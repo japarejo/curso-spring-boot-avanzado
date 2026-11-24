@@ -80,7 +80,7 @@ public class BillsRestClientGateway implements BillsGateway {
 	}
 
 	@Override
-	@CircuitBreaker(name = RESILIENCE_INSTANCE, fallbackMethod = "optionalVacio")
+	@CircuitBreaker(name = RESILIENCE_INSTANCE, fallbackMethod = "optionalVacio") // ResponseEntity<Bill>
 	public Optional<Bill> findById(Integer id, String authorization) {
 		return Optional.ofNullable(restClient.get()
 			.uri(BILLS_PATH + "/{id}", id)

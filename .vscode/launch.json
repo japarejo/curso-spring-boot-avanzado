@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TareasApplication",
+            "request": "launch",
+            "mainClass": "com.idexaformacion.cursos.tareas.TareasApplication",
+            "projectName": "tareas"
+        },
+        {
+            "type": "java",
             "name": "BillsServiceApplication",
             "request": "launch",
             "mainClass": "org.springframework.samples.petclinic.bills.BillsServiceApplication",

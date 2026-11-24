@@ -106,4 +106,35 @@ public class EntitiesTest {
 			System.out.println("Pet visits: "+pe.getVisits().size());		
 		}
 	}
+
+
+
+	@Test 
+	public void entityManagerTest(){
+		Owner o=entityManager.find(Owner.class, 1);
+		System.out.println(o.getFullName());
+		System.out.println("Mascotas de "+o.getFullName()+": "+o.getPets().size());
+		for(Pet p:o.getPets()){
+			System.out.println("Pet: "+p +" id:"+p.getId());
+			System.out.println("Pet: "+p.getName() +" id:"+p.getId());
+			System.out.println("Pet: "+p.getType() +" id:"+p.getId());
+			System.out.println("Pet: "+p.getBirthDate() +" id:"+p.getId());
+			System.out.println("Pet: "+p.getOwner() +" id:"+p.getId());		
+			System.out.println("Pet visits: "+p.getVisits().size());		
+		}
+
+
+		Pet d=new Pet();
+		d.setName("Donnie");
+		d.setType(o.getPets().iterator().next().getType());
+		d.setBirthDate(java.time.LocalDate.of(2020, 1, 1	));
+		d.setAge(6);
+		d.setOwner(o);
+		System.out.println("Pet: "+d+" id: "+d.getId());
+		entityManager.persist(d);
+		System.out.println("Pet: "+d+" id: "+d.getId());
+		entityManager.remove(d);		
+		d=entityManager.find(Pet.class, 14);
+		System.out.println("Pet: "+d+" id: "+d.getId());
+	}
 }

@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Nota para Spring Boot 4.x: el equivalente nativo son las interfaces con
  * @HttpExchange registradas con @ImportHttpServices, sin dependencia de Feign.
  */
-@FeignClient(value = "bills-service", url = "${petclinic.bills.base-url:http://localhost:8040}")
+@FeignClient(value = "bills-service")
 public interface BillClient {
 
 	@GetMapping("/api/v1/bills")
