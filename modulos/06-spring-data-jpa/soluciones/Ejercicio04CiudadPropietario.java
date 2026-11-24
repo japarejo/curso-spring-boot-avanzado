@@ -8,6 +8,8 @@
 // =============================================================================
 package org.springframework.samples.petclinic.repository;
 
+import jakarta.persistence.criteria.Expression;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.samples.petclinic.model.Visit;
 
@@ -24,8 +26,13 @@ public final class Ejercicio04CiudadPropietario {
 	// combinacion con and(...) funcione sin escribir un solo `if`: Spring Data
 	// descarta los predicados nulos.
 	public static Specification<Visit> byOwnerCity(String ownerCity) {
-		return (root, query, cb) -> ownerCity == null || ownerCity.isBlank() ? null
-				: cb.equal(cb.lower(root.get("pet").get("owner").get("city")), ownerCity.toLowerCase());
+		return (root, query, cb) -> {
+			if (ownerCity == null || ownerCity.isBlank()) {
+				return null; // sin filtro
+			}
+			Expression<String> ciudad = root.get("pet").get("owner").get("city");
+			return cb.equal(cb.lower(ciudad), ownerCity.toLowerCase());
+		};
 	}
 
 	// -------------------------------------------------------------------------
@@ -42,14 +49,15 @@ public final class Ejercicio04CiudadPropietario {
 	public static Specification<Visit> filterVisits(Integer petId, String ownerLastName, String petName,
 			String petType, String description, java.time.LocalDate fromDate, java.time.LocalDate toDate,
 			String ownerCity) {
-		return Specification.where(VisitSpecification.byPetId(petId))
-			.and(VisitSpecification.byOwnerLastName(ownerLastName))
-			.and(VisitSpecification.byPetName(petName))
-			.and(VisitSpecification.byPetType(petType))
-			.and(VisitSpecification.byDescription(description))
-			.and(VisitSpecification.fromDate(fromDate))
-			.and(VisitSpecification.toDate(toDate))
-			.and(byOwnerCity(ownerCity));
+		return Specification.allOf(
+				VisitSpecification.byPetId(petId),
+				VisitSpecification.byOwnerLastName(ownerLastName),
+				VisitSpecification.byPetName(petName),
+				VisitSpecification.byPetType(petType),
+				VisitSpecification.byDescription(description),
+				VisitSpecification.fromDate(fromDate),
+				VisitSpecification.toDate(toDate),
+				byOwnerCity(ownerCity));
 	}
 
 	// -------------------------------------------------------------------------

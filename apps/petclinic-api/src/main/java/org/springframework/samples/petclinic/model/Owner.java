@@ -64,7 +64,7 @@ public class Owner extends Person {
 	private String telephone;
 
 	@JsonIgnore
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", orphanRemoval = true)
 	private Set<Pet> pets;
 	
 	@JsonIgnore
